@@ -40,9 +40,10 @@ public class main {
 		int num_of_ngrams = 0; // counts with duplicates
 		try (BufferedReader br = new BufferedReader(new FileReader(input))) {
 			String line;
-			
+
 			while ((line = br.readLine()) != null) {
-				String[] line_words = line.split("");
+				String pattern = "[\\p{Punct}\\s]+";
+				String[] line_words = line.split(pattern);
 				int len = line_words.length;
 				for (int i = 0; i < len - n; i++) {
 
@@ -76,13 +77,16 @@ public class main {
 			writer.println("\\data\\");
 			writer.format("ngram %d=%d\n", n, counters.size());
 			writer.println();
-			
+
 			writer.format("\\%d-grams:\n", n);
-			for (Entry<Ngram, Integer> pair:counters.entrySet()){
-				double P=pair.getValue()/num_of_ngrams;
-				double logP=Math.log(P);//natural logarithm OK?				
-				writer.println(logP+pair.getKey().toString());				
-			}										
+			for (Entry<Ngram, Integer> pair : counters.entrySet()) {
+				double P = (double) pair.getValue() / num_of_ngrams;
+				if (pair.getValue()!=1){
+					System.out.println(pair.getKey().toString() + " " + pair.getValue());
+				}
+				double logP = Math.log(P);// natural logarithm OK?
+				writer.println(logP + " " + pair.getKey().toString());
+			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch blo1ck
 			e.printStackTrace();
@@ -90,11 +94,14 @@ public class main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println(output);
+		System.out.println("DONE");
 	}
 
 	private static void parseARGS(String[] args) {
 		// TODO //set real globals
-		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
+//		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
+		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
 		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
 		flag_GAMA = 1;
 		flag_n = 3;
