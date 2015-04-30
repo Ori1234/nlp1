@@ -45,7 +45,7 @@ public class main {
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
-				for (int i = 0; i < len - n; i++) {
+				for (int i = 0; i < len - (n - 1); i++) {
 
 					num_of_ngrams++;
 
