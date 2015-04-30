@@ -1,9 +1,14 @@
 package ex1;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Ngram {
+	
+	
+	public static String START_END="<S>";
+	
 	private List<String> words;
 
 	public List<String> get() {
@@ -51,6 +56,16 @@ public class Ngram {
 		result = prime * result
 				+ ((words == null) ? 0 : words.hashCode());
 		return result;
+	}
+
+	/**
+	 * 
+	 * @return Ngram with first n-1 words of this Ngram
+	 */
+	public Ngram getPrefix() {
+		List<String> words_1= new ArrayList<String>(words);
+		words_1.remove(words.size()-1);
+		return new Ngram(words_1);
 	}
 
 	// Read more:
