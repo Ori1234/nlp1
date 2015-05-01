@@ -148,13 +148,17 @@ public class Lm {
 		flag_o = params.get("-o");
 		flag_n = Integer.parseInt(params.get("-n"));
 		flag_s = params.get("-s");
+		if (params.get("-lmbd") == null) {
+			flag_GAMA = 1;
+		} else {
+			flag_GAMA = Double.parseDouble(params.get("-lmbd"));
+		}
 
 
 		// TODO //set real globals
 //		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
 //		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
 //		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
-		flag_GAMA = 1;
 //		flag_n = 3;
 //		flag_s = "";
 	}
