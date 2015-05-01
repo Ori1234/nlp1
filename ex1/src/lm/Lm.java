@@ -18,11 +18,11 @@ import java.util.Map.Entry;
 
 import ex1.Ngram;
 
-public class main {
+public class Lm {
 
 	private static String flag_i; // input path
 	private static String flag_o; // output path
-	private static int flag_GAMA; // smoothing paramater <optinoal>
+	private static double flag_GAMA; // smoothing paramater <optinoal>
 	private static int flag_n; // n- gram
 	private static String flag_s; // choose smoothing
 
@@ -33,19 +33,13 @@ public class main {
 		int n = flag_n;
 		String input = flag_i;
 		String output = flag_o;
-
-		// read file and count ngrams
-		//TODO count both in one pass. and also count lines.
-		Map<Ngram, Integer> counters = countNgrams(n,input);
-		Map<Ngram, Integer> counters_1 = countNgrams(n-1,input);
+		String smoothing=flag_s;
+		double smoothing_GAMA=flag_GAMA;
 		
-		//a really dirty fix.
-		List<String> Ngram_start_start = new ArrayList<String>();
-		for (int i=0;i<n-1;i++)
-			Ngram_start_start.add(Ngram.START_END); 
-		Integer num_of_lines=count_lines(input);
-		counters_1.put(new Ngram(Ngram_start_start),num_of_lines);
-
+		// read file and count ngrams
+		//TODO (maybe) count both in one pass.
+		Map<Ngram, Integer> counters = countNgrams(n,input);
+		Map<Ngram, Integer> counters_1 = countNgrams(n-1,input);		
 		
 		// write model
 		try (PrintWriter writer = new PrintWriter(output, "UTF-8")) {
@@ -53,25 +47,13 @@ public class main {
 			writer.format("ngram %d=%d\n", n, counters.size());
 			writer.println();
 
-			writer.format("\\%d-grams:\n", n);
+			write_ngrams(n, counters, writer);
 			
-			for (Entry<Ngram, Integer> pair : counters.entrySet()) {
-				//get count for first n-1 words
-				Ngram prefix=pair.getKey().getPrefix();
-				
-				
-				Integer count_1 = counters_1.get(prefix);
-				if (count_1==null){
-					System.out.println("help");
-				}
-				double P = (double) pair.getValue() / count_1;
-				//just for fun:
-				if (pair.getValue()!=1){
-					System.out.println(pair.getKey().toString() + " " + pair.getValue());
-				}
-				double logP = Math.log(P);// natural logarithm OK?
-				writer.println(logP + " " + pair.getKey().toString());
-			}
+			write_ngrams(n-1, counters_1, writer);
+			
+			writer.println("\\smoothing\\");
+			writer.format("%s %f", smoothing,smoothing_GAMA);					
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch blo1ck
 			e.printStackTrace();
@@ -83,22 +65,18 @@ public class main {
 		System.out.println("DONE");
 	}
 
-	private static Integer count_lines(String input) {		
-		int count=0;
-
-		try (BufferedReader br = new BufferedReader(new FileReader(input))) {
-			
-
-			while (br.readLine() != null){
-				count++;
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private static void write_ngrams(int n, Map<Ngram, Integer> counters,
+			PrintWriter writer) {
+		writer.format("\\%d-grams:\n", n);
+		
+		for (Entry<Ngram, Integer> pair : counters.entrySet()) {
+											
+			int count = pair.getValue();								
+			writer.println(count + " " + pair.getKey().toString());
 		}
-		return count;
+		writer.println();
 	}
-
+	
 	private static Map<Ngram, Integer> countNgrams(int n, String input) {
 		Map<Ngram, Integer> counters = new HashMap<>();
 		
@@ -109,7 +87,7 @@ public class main {
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
-				for (int i = 0; i < len+1; i++) {
+				for (int i = -1; i < len+1; i++) {
 					List<String> ngram_words = new ArrayList<String>();
 
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
@@ -153,7 +131,7 @@ public class main {
 		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
 		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
 		flag_GAMA = 1;
-		flag_n = 4;
+		flag_n = 3;
 		flag_s = "";
 	}
 

@@ -62,7 +62,7 @@ public class Ngram {
 	 * 
 	 * @return Ngram with first n-1 words of this Ngram
 	 */
-	public Ngram getPrefix() {
+	public Ngram remove_last_word() {
 		List<String> words_1= new ArrayList<String>(words);
 		words_1.remove(words.size()-1);
 		return new Ngram(words_1);
