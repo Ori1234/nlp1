@@ -126,13 +126,37 @@ public class Lm {
 	}
 
 	private static void parseARGS(String[] args) {
+		// a structure to hold the command line params
+		Map<String, String> params = new HashMap<String, String>();
+		// go over params
+		for (int i = 0; i < args.length; i++) {
+			switch (args[i].charAt(0)) {
+	        case '-':
+	            if (args[i].length() < 2) {
+	                throw new IllegalArgumentException("Not a valid argument: "+args[i]);
+	            } else {
+	                if (args.length-1 == i)
+	                    throw new IllegalArgumentException("Expected arg after: "+args[i]);
+	                // -opt
+	                params.put(args[i], args[i+1]);
+	                i++;
+	            }
+	            break;
+			}
+		}
+		flag_i = params.get("-i");
+		flag_o = params.get("-o");
+		flag_n = Integer.parseInt(params.get("-n"));
+		flag_s = params.get("-s");
+
+
 		// TODO //set real globals
 //		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
-		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
-		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
+//		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
+//		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
 		flag_GAMA = 1;
-		flag_n = 3;
-		flag_s = "";
+//		flag_n = 3;
+//		flag_s = "";
 	}
 
 }
