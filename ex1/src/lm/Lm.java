@@ -107,7 +107,8 @@ public class Lm {
 				int len = line_words.length;
 				for (int i = -1; i < len+1; i++) {
 					List<String> ngram_words = new ArrayList<String>();
-
+					
+					// what happens if the line is too short?
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
 							ngram_words.add(Ngram.START_END);

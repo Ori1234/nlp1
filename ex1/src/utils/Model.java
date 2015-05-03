@@ -1,5 +1,11 @@
 package utils;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
@@ -46,7 +52,49 @@ public class Model {
 	}
 
 	public void calculateProplexity(String text) {
-		// TODO Auto-generated method stub
+		int sumOfLogs = 0;
+		int words = 0;
+		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
+			String line;
+
+			while ((line = br.readLine()) != null) {
+				String pattern = "[\\p{Punct}\\s]+";
+				String[] line_words = line.split(pattern);
+				int len = line_words.length;
+				words += len;
+				// does this go over ngrams in different lines? should it?
+				for (int i = -1; i < len+1; i++) {
+					List<String> ngram_words = new ArrayList<String>();
+					
+					// what happens if the line is too short?
+					for (int j = i -n +1 ; j <= i; j++) {   //+1
+						if (j<0){
+							ngram_words.add(Ngram.START_END);
+						}else if(j==len){
+							ngram_words.add(Ngram.START_END);						
+						}else{
+							ngram_words.add(line_words[j]);
+						}
+					}
+					
+					if (ngram_words.size()!=n){
+						System.out.println("huston we have a problem");
+					}
+					Ngram curr_ngram = new Ngram(ngram_words);
+					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
+				}		
+			}
+			
+			double perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/words));
+			System.out.println("The perplexity is: " + perplexity);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block //TODO print to user bad input
+			// file name
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }
