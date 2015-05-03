@@ -4,6 +4,7 @@ import java.util.Map;
 
 import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
 import utils.ProbabilityCalculators.ProbabilityCalculator;
+import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Model {
 	ProbabilityCalculator pc; // (lidstone/WB)
@@ -15,7 +16,7 @@ public class Model {
 		if (smoothing_type==SMOOTHING.LIDSTONE){
 			pc=new LindstonProbabilityCalculator(counters,vucabelary_size,LAMBDA);
 		}else{
-			
+			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, LAMBDA);
 		}
 		this.n=n;
 	}

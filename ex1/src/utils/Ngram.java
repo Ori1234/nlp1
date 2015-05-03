@@ -32,6 +32,13 @@ public class Ngram {
 	public Ngram(List<String> ngram_words) {
 		words = ngram_words; // Shallow clone/deep clone?
 	}
+	
+	// return a new Ngram with a new word at the end
+	public Ngram(Ngram shorter, String word) {
+		words = new ArrayList<String>(shorter.get());
+		words.add(word);
+		n = shorter.n + 1;
+	}
 
 	@Override
 	public String toString() {
