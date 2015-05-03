@@ -1,4 +1,4 @@
-package ex1;
+package utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,17 +10,23 @@ public class Ngram {
 	public static String START_END="<S>";
 	
 	private List<String> words;
-
+	private int n;
 	public List<String> get() {
 		return words;
 	}
 
+	/**
+	 * constractor
+	 * @param w1
+	 * @param rest_of_words
+	 */
 	public Ngram(String w1, String... rest_of_words) {
 		words = new ArrayList<String>();
 		words.add(w1);
 		for (String w : rest_of_words) {
 			words.add(w);
 		}
+		n=words.size();
 	}
 
 	public Ngram(List<String> ngram_words) {
@@ -37,6 +43,9 @@ public class Ngram {
 		return sb.substring(0, sb.length() - 1);
 	}
 
+	
+	// Read more:
+		// http://javarevisited.blogspot.com/2011/02/how-to-write-equals-method-in-java.html#ixzz3Yma1aSuk
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -68,6 +77,9 @@ public class Ngram {
 		return new Ngram(words_1);
 	}
 
-	// Read more:
-	// http://javarevisited.blogspot.com/2011/02/how-to-write-equals-method-in-java.html#ixzz3Yma1aSuk
+	public int n() {
+		return n;
+	}
+
+	
 }

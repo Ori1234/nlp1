@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ex1.Ngram;
-import ex1.Utils;
+import utils.Ngram;
+import utils.Utils;
 
 public class Lm {
 
@@ -39,11 +39,11 @@ public class Lm {
 		if (smoothing==null){
             throw new IllegalArgumentException("missing required flag -s");
 		}
-		double smoothing_GAMA;
+		double lidstone_LAMBDA;
 		if (params.get("-lmbd") == null) {
-			smoothing_GAMA = 1;
+			lidstone_LAMBDA = 1;
 		} else {
-			smoothing_GAMA = Double.parseDouble(params.get("-lmbd"));
+			lidstone_LAMBDA = Double.parseDouble(params.get("-lmbd"));
 		}
 		
 		
@@ -70,7 +70,7 @@ public class Lm {
 			write_ngrams(n-1, counters_1, writer);
 			
 			writer.println("\\smoothing\\");
-			writer.format("%s %f", smoothing,smoothing_GAMA);					
+			writer.format("%s %f", smoothing,lidstone_LAMBDA);					
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch blo1ck
