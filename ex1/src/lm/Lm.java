@@ -1,15 +1,11 @@
 package lm;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,27 +13,49 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import ex1.Ngram;
+import ex1.Utils;
 
 public class Lm {
 
-	private static String flag_i; // input path
-	private static String flag_o; // output path
-	private static double flag_GAMA; // smoothing paramater <optinoal>
-	private static int flag_n; // n- gram
-	private static String flag_s; // choose smoothing
-
 	public static void main(String[] args) {
 
-		parseARGS(args); // sets glabals
+		Map<String, String> params = Utils.parseARGS(args); // sets glabals
 
-		int n = flag_n;
-		String input = flag_i;
-		String output = flag_o;
-		String smoothing=flag_s;
-		double smoothing_GAMA=flag_GAMA;
+	
+		String n_str=params.get("-n");
+		if (n_str==null){
+            throw new IllegalArgumentException("missing required flag -n");
+		}
+		int n = Integer.parseInt(n_str);
+		String input = params.get("-i");
+		if (input==null){
+            throw new IllegalArgumentException("missing required flag -i");
+		}
+		String output = params.get("-o");
+		if (output==null){
+            throw new IllegalArgumentException("missing required flag -o");
+		}
+		String smoothing=params.get("-s");
+		if (smoothing==null){
+            throw new IllegalArgumentException("missing required flag -s");
+		}
+		double smoothing_GAMA;
+		if (params.get("-lmbd") == null) {
+			smoothing_GAMA = 1;
+		} else {
+			smoothing_GAMA = Double.parseDouble(params.get("-lmbd"));
+		}
 		
+		
+/*		//COMMENT OUT IF NOT DEBUG
+		input = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
+		input = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
+		output = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
+		n = 3;
+		smoothing= "";
+	*/
+			
 		// read file and count ngrams
-		//TODO (maybe) count both in one pass.
 		Map<Ngram, Integer> counters = countNgrams(n,input);
 		Map<Ngram, Integer> counters_1 = countNgrams(n-1,input);		
 		
@@ -124,43 +142,4 @@ public class Lm {
 		}
 		return counters;
 	}
-
-	private static void parseARGS(String[] args) {
-		// a structure to hold the command line params
-		Map<String, String> params = new HashMap<String, String>();
-		// go over params
-		for (int i = 0; i < args.length; i++) {
-			switch (args[i].charAt(0)) {
-	        case '-':
-	            if (args[i].length() < 2) {
-	                throw new IllegalArgumentException("Not a valid argument: "+args[i]);
-	            } else {
-	                if (args.length-1 == i)
-	                    throw new IllegalArgumentException("Expected arg after: "+args[i]);
-	                // -opt
-	                params.put(args[i], args[i+1]);
-	                i++;
-	            }
-	            break;
-			}
-		}
-		flag_i = params.get("-i");
-		flag_o = params.get("-o");
-		flag_n = Integer.parseInt(params.get("-n"));
-		flag_s = params.get("-s");
-		if (params.get("-lmbd") == null) {
-			flag_GAMA = 1;
-		} else {
-			flag_GAMA = Double.parseDouble(params.get("-lmbd"));
-		}
-
-
-		// TODO //set real globals
-//		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
-//		flag_i = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
-//		flag_o = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
-//		flag_n = 3;
-//		flag_s = "";
-	}
-
 }
