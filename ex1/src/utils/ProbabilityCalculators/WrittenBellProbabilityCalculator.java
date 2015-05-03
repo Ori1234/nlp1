@@ -40,7 +40,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		Ngram tempGram;
 		// run over all the words in the corpus
 		for (Ngram oneGram : counters.get(1).keySet()) {
-			word = oneGram.get().get(0);
+			word = oneGram.get().get(1);
 			tempGram = new Ngram(ngram, word);
 			// check if the new ngram with the new word is in the table
 			if (counters.get(tempGram.n()).get(tempGram) != null) {
