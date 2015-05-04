@@ -63,6 +63,8 @@ public class Lm {
 		try (PrintWriter writer = new PrintWriter(output, "UTF-8")) {
 			writer.println("\\data\\");
 			writer.format("ngram %d=%d\n", n, counters.size());
+			writer.format("ngram %d=%d\n", n-1, counters_1.size());
+
 			writer.println();
 
 			write_ngrams(n, counters, writer);
@@ -105,24 +107,22 @@ public class Lm {
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
-				for (int i = -1; i < len+1; i++) {
-					List<String> ngram_words = new ArrayList<String>();
-					
-					// what happens if the line is too short?
+				for (int i = -1; i < len+1; i++) {							
+					Ngram curr_ngram = new Ngram();
+					// what happens if the line is too short? 
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
-							ngram_words.add(Ngram.START_END);
+							curr_ngram.add_word(Ngram.START_END);
 						}else if(j==len){
-							ngram_words.add(Ngram.START_END);						
+							curr_ngram.add_word(Ngram.START_END);						
 						}else{
-							ngram_words.add(line_words[j]);
+							curr_ngram.add_word(line_words[j]);
 						}
 					}
 					
-					if (ngram_words.size()!=n){
+					if (curr_ngram.n()!=n){
 						System.out.println("huston we have a problem");
-					}
-					Ngram curr_ngram = new Ngram(ngram_words);
+					}					
 					Integer count;
 					if ((count = counters.get(curr_ngram)) == null) {
 						counters.put(curr_ngram, 1);

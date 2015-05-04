@@ -64,23 +64,22 @@ public class Model {
 				words += len;
 				// does this go over ngrams in different lines? should it?
 				for (int i = -1; i < len+1; i++) {
-					List<String> ngram_words = new ArrayList<String>();
+					Ngram curr_ngram = new Ngram();
 					
-					// what happens if the line is too short?
+					// what happens if the line is too short?  //shouldn't be a problem
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
-							ngram_words.add(Ngram.START_END);
+							curr_ngram.add_word(Ngram.START_END);
 						}else if(j==len){
-							ngram_words.add(Ngram.START_END);						
+							curr_ngram.add_word(Ngram.START_END);						
 						}else{
-							ngram_words.add(line_words[j]);
+							curr_ngram.add_word(line_words[j]);
 						}
 					}
 					
-					if (ngram_words.size()!=n){
+					if (curr_ngram.n()!=n){
 						System.out.println("huston we have a problem");
 					}
-					Ngram curr_ngram = new Ngram(ngram_words);
 					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
 				}		
 			}

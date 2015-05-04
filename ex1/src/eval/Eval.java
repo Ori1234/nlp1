@@ -40,9 +40,8 @@ public class Eval {
 		DATA, N_GRAM, UNKNOWN;
 	}
 
-	// TODO implement
+	// TODO complete implementation
 	private static Model loadModel(String model_file) {
-		// TODO read and parse model file
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
 		int vucabelary_size = 0;
 		SMOOTHING smoothing_type = null;
@@ -50,14 +49,12 @@ public class Eval {
 		int max_n = 0;
 		try (BufferedReader br = new BufferedReader(new FileReader(model_file))) {
 			String line;
-
 			int n = 0;
 			SECTION section = null;
 			while ((line = br.readLine()) != null) {
 				if (line.equals("")){
 					continue;
 				}
-				
 				// Recognize current section				
 				if (line.charAt(0) == '\\') {
 					if (line.equals("\\data\\")) {
@@ -87,7 +84,6 @@ public class Eval {
 						}
 					}
 				}
-
 				//insert data by section
 				switch (section) {
 				case DATA:
@@ -100,7 +96,7 @@ public class Eval {
 																// declaration
 					Ngram ngram = new Ngram();
 					for (int i = 1; i < line_words.length; i++) {
-						ngram.push(line_words[i]);
+						ngram.add_word(line_words[i]);
 					}
 					if (ngram.n() != n) {// sanity
 						System.out.println("model data incorrect:" + ngram.n()

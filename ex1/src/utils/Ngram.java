@@ -95,7 +95,7 @@ public class Ngram {
 		return n;
 	}
 
-	public void push(String string) {
+	public void add_word(String string) {
 		words.add(string);
 	}
 
