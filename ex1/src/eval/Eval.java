@@ -4,9 +4,14 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import utils.Model;
+import utils.Ngram;
+import utils.SMOOTHING;
 import utils.Utils;
 
 public class Eval {
@@ -25,22 +30,88 @@ public class Eval {
 
 		// read model to counters.
 		Model model = loadModel(model_file);
-		
-		
+
 		// read text and calculate preplexity. (for each line? for whole text?)
 		String text = null;
 		model.calculateProplexity(text);
 	}
 
-	
-	
-	//TODO implement
-	private static Model loadModel(String model_file) {		
-		//TODO read and parse model file
+	public enum SECTION {
+		DATA, N_GRAM, UNKNOWN;
+	}
+
+	// TODO implement
+	private static Model loadModel(String model_file) {
+		// TODO read and parse model file
+		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
+		int vucabelary_size = 0;
+		SMOOTHING smoothing_type = null;
+		double LAMBDA = 0;
+		int max_n = 0;
 		try (BufferedReader br = new BufferedReader(new FileReader(model_file))) {
 			String line;
+
+			int n = 0;
+			SECTION section = null;
 			while ((line = br.readLine()) != null) {
-				// TODO Auto-generated method stub
+				if (line.equals("")){
+					continue;
+				}
+				
+				// Recognize current section				
+				if (line.charAt(0) == '\\') {
+					if (line.equals("\\data\\")) {
+						section = SECTION.DATA;
+						continue;
+					} else if (line.equals("\\SOME OTHER DATA")) { // TODO
+
+						continue;
+					} else {
+						String n_gram_pattern = ".(\\d)-grams:";
+						Pattern pattern = Pattern.compile(n_gram_pattern);
+						Matcher matcher = pattern.matcher(line);
+						if (matcher.matches()) {
+							n = Integer.parseInt(matcher.group(1));
+							if (n > max_n) {
+								max_n = n;
+							}
+							section = SECTION.N_GRAM;
+							counters.put(n, new HashMap<Ngram, Integer>());
+							continue;
+						} else {
+							section = SECTION.UNKNOWN;
+							System.out
+									.println("unkonwn section in model file :"
+											+ line);
+							continue;
+						}
+					}
+				}
+
+				//insert data by section
+				switch (section) {
+				case DATA:
+					//TODO?
+					break;
+				case N_GRAM:
+					String[] line_words = line.split(" ");
+					int count = Integer.parseInt(line_words[0]);// TODO add
+																// try/catch
+																// declaration
+					Ngram ngram = new Ngram();
+					for (int i = 1; i < line_words.length; i++) {
+						ngram.push(line_words[i]);
+					}
+					if (ngram.n() != n) {// sanity
+						System.out.println("model data incorrect:" + ngram.n()
+								+ " words, under section " + n + "-grams");
+						continue;
+					}
+					counters.get(n).put(ngram, count);
+					break;
+				default:
+					break;
+				}
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -49,6 +120,8 @@ public class Eval {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+
+		return new Model(counters, vucabelary_size, max_n, smoothing_type,
+				LAMBDA);
 	}
 }

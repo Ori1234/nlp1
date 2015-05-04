@@ -40,6 +40,10 @@ public class Ngram {
 		n = shorter.n + 1;
 	}
 
+	public Ngram() {
+		words = new ArrayList<String>();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -85,7 +89,14 @@ public class Ngram {
 	}
 
 	public int n() {
+		if (n==0){
+			n=words.size();
+		}
 		return n;
+	}
+
+	public void push(String string) {
+		words.add(string);
 	}
 
 	
