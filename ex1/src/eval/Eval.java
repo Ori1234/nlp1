@@ -18,7 +18,7 @@ public class Eval {
 
 	public static void main(String[] args) {
 		Map<String, String> params = Utils.parseARGS(args); // sets glabals
-
+		
 		String input = params.get("-i");
 		if (input == null) {
 			throw new IllegalArgumentException("missing required flag -i");
@@ -32,8 +32,8 @@ public class Eval {
 		Model model = loadModel(model_file);
 
 		// read text and calculate preplexity. (for each line? for whole text?)
-		String text = null;
-		model.calculateProplexity(text);
+//		String text = null;
+		model.calculateProplexity(input);
 	}
 
 	public enum SECTION {
@@ -64,7 +64,7 @@ public class Eval {
 
 						continue;
 					} else {
-						String n_gram_pattern = ".(\\d)-grams:";
+						String n_gram_pattern = ".(\\d+)-grams:";
 						Pattern pattern = Pattern.compile(n_gram_pattern);
 						Matcher matcher = pattern.matcher(line);
 						if (matcher.matches()) {
@@ -87,7 +87,12 @@ public class Eval {
 				//insert data by section
 				switch (section) {
 				case DATA:
-					//TODO?
+					String unigram_pattern="ngram 1=(\\d+)";
+					Pattern pattern = Pattern.compile(unigram_pattern);
+					Matcher matcher = pattern.matcher(line);
+					if (matcher.matches()) {
+						vucabelary_size = Integer.parseInt(matcher.group(1));
+					}
 					break;
 				case N_GRAM:
 					String[] line_words = line.split(" ");
@@ -100,7 +105,8 @@ public class Eval {
 					}
 					if (ngram.n() != n) {// sanity
 						System.out.println("model data incorrect:" + ngram.n()
-								+ " words, under section " + n + "-grams");
+								+ " words, under section " + n + "-grams "+line);
+						
 						continue;
 					}
 					counters.get(n).put(ngram, count);

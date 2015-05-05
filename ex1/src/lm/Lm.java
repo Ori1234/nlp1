@@ -18,6 +18,7 @@ import utils.Utils;
 public class Lm {
 
 	public static void main(String[] args) {
+		
 
 		Map<String, String> params = Utils.parseARGS(args); // sets glabals
 
@@ -57,19 +58,21 @@ public class Lm {
 			
 		// read file and count ngrams
 		Map<Ngram, Integer> counters = countNgrams(n,input);
-		Map<Ngram, Integer> counters_1 = countNgrams(n-1,input);		
+		Map<Ngram, Integer> counters_n1 = countNgrams(n-1,input);	
+		Map<Ngram, Integer> counters_1 = countNgrams(1,input);
 		
 		// write model
 		try (PrintWriter writer = new PrintWriter(output, "UTF-8")) {
 			writer.println("\\data\\");
 			writer.format("ngram %d=%d\n", n, counters.size());
-			writer.format("ngram %d=%d\n", n-1, counters_1.size());
+			writer.format("ngram %d=%d\n", n-1, counters_n1.size());
+			writer.format("ngram %d=%d\n", 1, counters_1.size());
 
 			writer.println();
 
 			write_ngrams(n, counters, writer);
 			
-			write_ngrams(n-1, counters_1, writer);
+			write_ngrams(n-1, counters_n1, writer);
 			
 			writer.println("\\smoothing\\");
 			writer.format("%s %f", smoothing,lidstone_LAMBDA);					
