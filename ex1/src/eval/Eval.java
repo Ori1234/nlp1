@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +34,7 @@ public class Eval {
 
 		// read text and calculate preplexity. (for each line? for whole text?)
 //		String text = null;
-		model.calculateProplexity(input);
+		List<Double> proplexities = model.calculateProplexity(input);
 	}
 
 	public enum SECTION {

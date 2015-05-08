@@ -51,9 +51,10 @@ public class Model {
 		return result;
 	}
 
-	public void calculateProplexity(String text) {
+	public List<Double> calculateProplexity(String text) {
 		int sumOfLogs = 0;
-		int words = 0;
+		List<Double> proplexities = new ArrayList<Double>();
+		double perplexity;
 		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
 			String line;
 
@@ -61,7 +62,7 @@ public class Model {
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
-				words += len;
+				sumOfLogs = 0;
 				// does this go over ngrams in different lines? should it?
 				for (int i = -1; i < len+1; i++) {
 					Ngram curr_ngram = new Ngram();
@@ -81,11 +82,10 @@ public class Model {
 						System.out.println("huston we have a problem");
 					}
 					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
-				}		
+				}
+				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/len));
+				proplexities.add(perplexity);
 			}
-			
-			double perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/words));
-			System.out.println("The perplexity is: " + perplexity);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block //TODO print to user bad input
 			// file name
@@ -94,6 +94,6 @@ public class Model {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return proplexities;
 	}
 }
