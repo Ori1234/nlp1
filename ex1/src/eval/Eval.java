@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,7 @@ public class Eval {
 
 	public static void main(String[] args) {
 		Map<String, String> params = Utils.parseARGS(args); // sets glabals
-		
+
 		String input = params.get("-i");
 		if (input == null) {
 			throw new IllegalArgumentException("missing required flag -i");
@@ -33,7 +34,7 @@ public class Eval {
 		Model model = loadModel(model_file);
 
 		// read text and calculate preplexity. (for each line? for whole text?)
-//		String text = null;
+		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
 	}
 
@@ -44,6 +45,7 @@ public class Eval {
 	// TODO complete implementation
 	private static Model loadModel(String model_file) {
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
+		Map<String, String> data = new HashMap<String, String>();
 		int vucabelary_size = 0;
 		SMOOTHING smoothing_type = null;
 		double LAMBDA = 0;
@@ -53,16 +55,13 @@ public class Eval {
 			int n = 0;
 			SECTION section = null;
 			while ((line = br.readLine()) != null) {
-				if (line.equals("")){
+				if (line.equals("")) {
 					continue;
 				}
-				// Recognize current section				
+				// Recognize current section (DATA / N-GRAMS)
 				if (line.charAt(0) == '\\') {
 					if (line.equals("\\data\\")) {
 						section = SECTION.DATA;
-						continue;
-					} else if (line.equals("\\SOME OTHER DATA")) { // TODO
-
 						continue;
 					} else {
 						String n_gram_pattern = ".(\\d+)-grams:";
@@ -85,14 +84,21 @@ public class Eval {
 						}
 					}
 				}
-				//insert data by section
+				// insert data by section
 				switch (section) {
 				case DATA:
-					String unigram_pattern="ngram 1=(\\d+)";
+					String unigram_pattern = "ngram 1=(\\d+)";
 					Pattern pattern = Pattern.compile(unigram_pattern);
 					Matcher matcher = pattern.matcher(line);
 					if (matcher.matches()) {
 						vucabelary_size = Integer.parseInt(matcher.group(1));
+					} else {
+						String[] split = line.split("\\s*=\\s*");
+						if (split.length != 2) {
+							System.out.println("wrong data format:" + line);
+						} else {
+							data.put(split[0], split[1]);
+						}
 					}
 					break;
 				case N_GRAM:
@@ -106,8 +112,9 @@ public class Eval {
 					}
 					if (ngram.n() != n) {// sanity
 						System.out.println("model data incorrect:" + ngram.n()
-								+ " words, under section " + n + "-grams "+line);
-						
+								+ " words, under section " + n + "-grams "
+								+ line);
+
 						continue;
 					}
 					counters.get(n).put(ngram, count);
@@ -124,7 +131,21 @@ public class Eval {
 			e.printStackTrace();
 		}
 
-		return new Model(counters, vucabelary_size, max_n, smoothing_type,
-				LAMBDA);
+		//TODO check that data have required fields
+		
+		return new Model(counters, Integer.parseInt(data.get("vucabulary size")),
+				max(counters.keySet()),
+				(data.get("smoothing").equals(SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE : SMOOTHING.WB),
+				Double.parseDouble(data.get("lidstone labmda")));
+	}
+
+	private static int max(Set<Integer> keySet) {
+		int res = 0;
+		for (int i : keySet) {
+			if (i > res) {
+				res = i;
+			}
+		}
+		return res;
 	}
 }

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import utils.Ngram;
+import utils.SMOOTHING;
 import utils.Utils;
 
 public class Lm {
@@ -35,11 +36,11 @@ public class Lm {
 		String output = params.get("-o");
 		if (output==null){
             throw new IllegalArgumentException("missing required flag -o");
-		}
-		String smoothing=params.get("-s");
-		if (smoothing==null){
+		}		
+		if (params.get("-s")==null){
             throw new IllegalArgumentException("missing required flag -s");
 		}
+		SMOOTHING smoothing=(params.get("-s").equals("ls") ? SMOOTHING.LIDSTONE : SMOOTHING.WB);
 		double lidstone_LAMBDA;
 		if (params.get("-lmbd") == null) {
 			lidstone_LAMBDA = 1;
@@ -66,16 +67,18 @@ public class Lm {
 			writer.println("\\data\\");
 			writer.format("ngram %d=%d\n", n, counters.size());
 			writer.format("ngram %d=%d\n", n-1, counters_n1.size());
-			writer.format("ngram %d=%d\n", 1, counters_1.size());
-
+			writer.format("vucabulary size=%d\n",  counters_1.size());
+			writer.format("smoothing=%s\n",  smoothing);
+			if (smoothing == SMOOTHING.LIDSTONE){
+				writer.format("lidstone labmda=%s\n",  lidstone_LAMBDA);
+			}
+			
 			writer.println();
 
 			write_ngrams(n, counters, writer);
 			
 			write_ngrams(n-1, counters_n1, writer);
-			
-			writer.println("\\smoothing\\");
-			writer.format("%s %f", smoothing,lidstone_LAMBDA);					
+										
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch blo1ck
@@ -108,6 +111,7 @@ public class Lm {
 
 			while ((line = br.readLine()) != null) {
 				String pattern = "[\\p{Punct}\\s]+";
+				line=line.replaceFirst(pattern, ""); //needed because java's split returns an empty string at beginning of split if line starts with pattern. 
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
 				for (int i = -1; i < len+1; i++) {							
