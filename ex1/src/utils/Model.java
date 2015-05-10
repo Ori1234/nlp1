@@ -52,7 +52,7 @@ public class Model {
 	}
 
 	public List<Double> calculateProplexity(String text) {
-		int sumOfLogs = 0;
+		double sumOfLogs = 0;
 		List<Double> proplexities = new ArrayList<Double>();
 		double perplexity;
 		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
@@ -81,9 +81,10 @@ public class Model {
 					if (curr_ngram.n()!=n){
 						System.out.println("huston we have a problem");
 					}
-					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
+					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));				
 				}
-				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/len));
+				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
+				System.out.println(perplexity);
 				proplexities.add(perplexity);
 			}
 		} catch (FileNotFoundException e) {
