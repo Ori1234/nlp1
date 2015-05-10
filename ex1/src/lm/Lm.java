@@ -57,27 +57,32 @@ public class Lm {
 		smoothing= "";
 	*/
 			
-		// read file and count ngrams
-		Map<Ngram, Integer> counters = countNgrams(n,input);
-		Map<Ngram, Integer> counters_n1 = countNgrams(n-1,input);	
-		Map<Ngram, Integer> counters_1 = countNgrams(1,input);
-		
+		// read file and count ngrams		
+		Map<Integer,Map<Ngram,Integer>> counts=new HashMap<Integer, Map<Ngram,Integer>>();
+		for (int curr_n=n;curr_n>0;curr_n--){
+			Map<Ngram, Integer> counters = countNgrams(curr_n,input);
+			counts.put(curr_n, counters);
+		}
+				
 		// write model
 		try (PrintWriter writer = new PrintWriter(output, "UTF-8")) {
 			writer.println("\\data\\");
-			writer.format("ngram %d=%d\n", n, counters.size());
-			writer.format("ngram %d=%d\n", n-1, counters_n1.size());
-			writer.format("vucabulary size=%d\n",  counters_1.size());
+			for (int curr_n=n;curr_n>0;curr_n--){
+				writer.format("ngram %d=%d\n", curr_n, counts.get(curr_n).size());	
+			}
+			
+			writer.format("vucabulary size=%d\n",  counts.get(1).size());
 			writer.format("smoothing=%s\n",  smoothing);
 			if (smoothing == SMOOTHING.LIDSTONE){
 				writer.format("lidstone labmda=%s\n",  lidstone_LAMBDA);
 			}
 			
 			writer.println();
-
-			write_ngrams(n, counters, writer);
+			for (int curr_n=n;curr_n>0;curr_n--){
+				write_ngrams(curr_n, counts.get(curr_n), writer);
+				writer.println();
+			}
 			
-			write_ngrams(n-1, counters_n1, writer);
 										
 			
 		} catch (FileNotFoundException e) {
@@ -119,9 +124,9 @@ public class Lm {
 					// what happens if the line is too short? 
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
-							curr_ngram.add_word(Ngram.START_END);
+							curr_ngram.add_word(Ngram.START);
 						}else if(j==len){
-							curr_ngram.add_word(Ngram.START_END);						
+							curr_ngram.add_word(Ngram.END);						
 						}else{
 							curr_ngram.add_word(line_words[j]);
 						}

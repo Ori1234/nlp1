@@ -36,6 +36,7 @@ public class Eval {
 		// read text and calculate preplexity. (for each line? for whole text?)
 		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
+		System.out.println(proplexities);
 	}
 
 	public enum SECTION {
@@ -46,9 +47,6 @@ public class Eval {
 	private static Model loadModel(String model_file) {
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
 		Map<String, String> data = new HashMap<String, String>();
-		int vucabelary_size = 0;
-		SMOOTHING smoothing_type = null;
-		double LAMBDA = 0;
 		int max_n = 0;
 		try (BufferedReader br = new BufferedReader(new FileReader(model_file))) {
 			String line;
@@ -69,9 +67,6 @@ public class Eval {
 						Matcher matcher = pattern.matcher(line);
 						if (matcher.matches()) {
 							n = Integer.parseInt(matcher.group(1));
-							if (n > max_n) {
-								max_n = n;
-							}
 							section = SECTION.N_GRAM;
 							counters.put(n, new HashMap<Ngram, Integer>());
 							continue;
@@ -87,19 +82,14 @@ public class Eval {
 				// insert data by section
 				switch (section) {
 				case DATA:
-					String unigram_pattern = "ngram 1=(\\d+)";
-					Pattern pattern = Pattern.compile(unigram_pattern);
-					Matcher matcher = pattern.matcher(line);
-					if (matcher.matches()) {
-						vucabelary_size = Integer.parseInt(matcher.group(1));
+
+					String[] split = line.split("\\s*=\\s*");
+					if (split.length != 2) {
+						System.out.println("wrong data format:" + line);
 					} else {
-						String[] split = line.split("\\s*=\\s*");
-						if (split.length != 2) {
-							System.out.println("wrong data format:" + line);
-						} else {
-							data.put(split[0], split[1]);
-						}
+						data.put(split[0], split[1]);
 					}
+
 					break;
 				case N_GRAM:
 					String[] line_words = line.split(" ");
@@ -131,12 +121,14 @@ public class Eval {
 			e.printStackTrace();
 		}
 
-		//TODO check that data have required fields
-		
-		return new Model(counters, Integer.parseInt(data.get("vucabulary size")),
-				max(counters.keySet()),
-				(data.get("smoothing").equals(SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE : SMOOTHING.WB),
-				Double.parseDouble(data.get("lidstone labmda")));
+		// TODO check that data have required fields
+
+		return new Model(counters,
+				Integer.parseInt(data.get("vucabulary size")),
+				max(counters.keySet()), (data.get("smoothing").equals(
+						SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE
+						: SMOOTHING.WB), Double.parseDouble(data
+						.get("lidstone labmda")));
 	}
 
 	private static int max(Set<Integer> keySet) {

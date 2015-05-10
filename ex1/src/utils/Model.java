@@ -70,9 +70,9 @@ public class Model {
 					// what happens if the line is too short?  //shouldn't be a problem
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
-							curr_ngram.add_word(Ngram.START_END);
+							curr_ngram.add_word(Ngram.START);
 						}else if(j==len){
-							curr_ngram.add_word(Ngram.START_END);						
+							curr_ngram.add_word(Ngram.END);						
 						}else{
 							curr_ngram.add_word(line_words[j]);
 						}
@@ -84,7 +84,7 @@ public class Model {
 					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));				
 				}
 				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
-				System.out.println(perplexity);
+//				System.out.println(perplexity);
 				proplexities.add(perplexity);
 			}
 		} catch (FileNotFoundException e) {

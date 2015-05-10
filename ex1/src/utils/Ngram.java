@@ -7,7 +7,8 @@ import java.util.List;
 public class Ngram {
 	
 	
-	public static String START_END="<S>";
+	public static String START="<S>";
+	public static String END="</S>";
 	
 	private List<String> words;
 	private int n;
