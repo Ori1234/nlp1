@@ -36,7 +36,10 @@ public class Eval {
 		// read text and calculate preplexity. (for each line? for whole text?)
 		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
-		System.out.println(proplexities);
+		System.out.println(model_file);
+		for (double p : proplexities)
+			System.out.println(p);
+
 	}
 
 	public enum SECTION {
