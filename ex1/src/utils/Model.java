@@ -33,10 +33,11 @@ public class Model {
 				left_sum = 1;
 				for (int k = 0; k < n; k++) {
 					double random = rand.nextDouble();
-					random /= left_sum;
+					random *= left_sum;
 					left_sum -= random;
 					lambdas.add(random);
 				}
+				pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, lambdas);
 				double prop = calculateProplexity(test_file).stream().mapToDouble(Double::doubleValue).sum();
 				if (prop < best) {
 					best = prop;
@@ -92,7 +93,7 @@ public class Model {
 					if (curr_ngram.n()!=n){
 						System.out.println("huston we have a problem");
 					}
-					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));				
+					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
 				}
 				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
 //				System.out.println(perplexity);

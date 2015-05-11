@@ -32,6 +32,7 @@ public class Ngram {
 
 	public Ngram(List<String> ngram_words) {
 		words = ngram_words; // Shallow clone/deep clone?
+		n = ngram_words.size();
 	}
 	
 	// return a new Ngram with a new word at the end

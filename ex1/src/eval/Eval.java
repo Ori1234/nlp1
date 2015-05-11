@@ -130,8 +130,9 @@ public class Eval {
 				Integer.parseInt(data.get("vucabulary size")),
 				max(counters.keySet()), (data.get("smoothing").equals(
 						SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE
-						: SMOOTHING.WB), Double.parseDouble(data
-						.get("lidstone labmda")), test_file);
+						: SMOOTHING.WB), (data.get("smoothing").equals(
+								SMOOTHING.LIDSTONE.toString())) ? Double.parseDouble(data
+						.get("lidstone labmda")) : 1, test_file);
 	}
 
 	private static int max(Set<Integer> keySet) {

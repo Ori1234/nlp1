@@ -25,7 +25,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		double prob = 0;
 		int numerator;
 		int denominator;
-		while (ngram.n() >= 0) {
+		while (ngram.n() > 0) {
 			if (ngram.n() == 1) {
 				if (counters.get(ngram.n()).get(ngram) != null) {
 					count = 0;
@@ -65,7 +65,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		Ngram tempGram;
 		// run over all the words in the corpus
 		for (Ngram oneGram : counters.get(1).keySet()) {
-			word = oneGram.get().get(1);
+			word = oneGram.get().get(0);
 			tempGram = new Ngram(ngram, word);
 			// check if the new ngram with the new word is in the table
 			if (counters.get(tempGram.n()).get(tempGram) != null) {
