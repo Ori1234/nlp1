@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
 import utils.ProbabilityCalculators.ProbabilityCalculator;
@@ -18,18 +19,38 @@ public class Model {
 	Map<Ngram, Double> probablities;
 
 	
-	public Model(Map<Integer,Map<Ngram,Integer>> counters,int vucabelary_size,int n,SMOOTHING smoothing_type, double LAMBDA){
+	public Model(Map<Integer,Map<Ngram,Integer>> counters,int vucabelary_size,int n,SMOOTHING smoothing_type, double LAMBDA, String test_file){
 		if (smoothing_type==SMOOTHING.LIDSTONE){
 			pc=new LindstonProbabilityCalculator(counters,vucabelary_size,LAMBDA);
 		}else{
-			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, LAMBDA);
+			List<Double> b_lambdas = new ArrayList<Double>();
+			List<Double> lambdas;
+			double best = Double.POSITIVE_INFINITY;
+			double left_sum = 1;
+			Random rand = new Random();
+			for (int i = 0; i < 50; i++) {
+				lambdas = new ArrayList<Double>();
+				left_sum = 1;
+				for (int k = 0; k < n; k++) {
+					double random = rand.nextDouble();
+					random /= left_sum;
+					left_sum -= random;
+					lambdas.add(random);
+				}
+				double prop = calculateProplexity(test_file).stream().mapToDouble(Double::doubleValue).sum();
+				if (prop < best) {
+					best = prop;
+					b_lambdas = lambdas;
+				}
+			}
+			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, b_lambdas);
 		}
 		this.n=n;
 	}
 	
 	// Lazy implementation
 	/**
-	 * get probability of Ngram after smoothing before interpulation
+	 * get probability of Ngram after smoothing
 	 * @param ngram
 	 * @return
 	 */
@@ -39,16 +60,6 @@ public class Model {
 			probablities.put(ngram, (a = pc.calculateProbability(ngram)));
 		}
 		return a;
-	}
-
-	public double getInterpulationProbability(Ngram ngram) {		
-		//TODO what about Lambdas????
-		double result=getProbability(ngram);
-		for(int i=n;i>0;i--){
-			Ngram curr_iteration_ngram = ngram.remove_last_word();
-			result+=getProbability(curr_iteration_ngram);
-		}
-		return result;
 	}
 
 	public List<Double> calculateProplexity(String text) {

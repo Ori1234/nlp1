@@ -31,7 +31,7 @@ public class Eval {
 		}
 
 		// read model to counters.
-		Model model = loadModel(model_file);
+		Model model = loadModel(model_file, input);
 
 		// read text and calculate preplexity. (for each line? for whole text?)
 		// String text = null;
@@ -47,7 +47,7 @@ public class Eval {
 	}
 
 	// TODO complete implementation
-	private static Model loadModel(String model_file) {
+	private static Model loadModel(String model_file, String test_file) {
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
 		Map<String, String> data = new HashMap<String, String>();
 		int max_n = 0;
@@ -131,7 +131,7 @@ public class Eval {
 				max(counters.keySet()), (data.get("smoothing").equals(
 						SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE
 						: SMOOTHING.WB), Double.parseDouble(data
-						.get("lidstone labmda")));
+						.get("lidstone labmda")), test_file);
 	}
 
 	private static int max(Set<Integer> keySet) {
