@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
 import utils.ProbabilityCalculators.ProbabilityCalculator;
@@ -39,7 +40,15 @@ public class Model {
 				}
 				lambdas.add(left_sum);
 				pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, lambdas);
-				double prop = calculateProplexity(test_file).stream().mapToDouble(Double::doubleValue).sum();
+				double prop = calculateProplexity(test_file).stream().filter(new Predicate<Double>() {
+					@Override
+					public boolean test(Double t) {
+						if (Double.isInfinite(t)) {
+							return false;
+						}
+						return true;
+					}}).mapToDouble(Double::doubleValue).sum();
+				System.out.println("prop = " + prop);
 				if (prop < best) {
 					best = prop;
 					b_lambdas = lambdas;
