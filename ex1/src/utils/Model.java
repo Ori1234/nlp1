@@ -21,6 +21,7 @@ public class Model {
 
 	
 	public Model(Map<Integer,Map<Ngram,Integer>> counters,int vucabelary_size,int n,SMOOTHING smoothing_type, double LAMBDA, String test_file){
+		this.n=n;
 		if (smoothing_type==SMOOTHING.LIDSTONE){
 			pc=new LindstonProbabilityCalculator(counters,vucabelary_size,LAMBDA);
 		}else{
@@ -29,7 +30,7 @@ public class Model {
 			double best = Double.POSITIVE_INFINITY;
 			double left_sum = 1;
 			Random rand = new Random();
-			for (int i = 0; i < 50; i++) {
+			for (int i = 0; i < 10; i++) {
 				lambdas = new ArrayList<Double>();
 				left_sum = 1;
 				for (int k = 0; k < n-1; k++) {
@@ -56,7 +57,6 @@ public class Model {
 			}
 			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, b_lambdas);
 		}
-		this.n=n;
 	}
 	
 	// Lazy implementation
