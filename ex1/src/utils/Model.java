@@ -31,12 +31,13 @@ public class Model {
 			for (int i = 0; i < 50; i++) {
 				lambdas = new ArrayList<Double>();
 				left_sum = 1;
-				for (int k = 0; k < n; k++) {
+				for (int k = 0; k < n-1; k++) {
 					double random = rand.nextDouble();
 					random *= left_sum;
 					left_sum -= random;
 					lambdas.add(random);
 				}
+				lambdas.add(left_sum);
 				pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, lambdas);
 				double prop = calculateProplexity(test_file).stream().mapToDouble(Double::doubleValue).sum();
 				if (prop < best) {
