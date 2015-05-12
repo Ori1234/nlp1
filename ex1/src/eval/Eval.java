@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +46,14 @@ public class Eval {
 		for (double p : proplexities)
 			System.out.println(p);
 		System.out.println();
-		System.out.println(proplexities.stream().mapToDouble(Double::doubleValue).sum()/proplexities.size());
+		System.out.println(proplexities.stream().filter(new Predicate<Double>() {
+			@Override
+			public boolean test(Double t) {
+				if (Double.isInfinite(t)) {
+					return false;
+				}
+				return true;
+			}}).mapToDouble(Double::doubleValue).sum()/proplexities.size());
 
 	}
 
