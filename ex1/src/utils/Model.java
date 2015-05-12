@@ -30,9 +30,12 @@ public class Model {
 			double best = Double.POSITIVE_INFINITY;
 			double left_sum = 1;
 			Random rand = new Random();
+			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, b_lambdas);			
 			for (int i = 0; i < 10; i++) {
 				lambdas = new ArrayList<Double>();
 				left_sum = 1;
+				
+				
 				for (int k = 0; k < n-1; k++) {
 					double random = rand.nextDouble();
 					random *= left_sum;
@@ -40,7 +43,8 @@ public class Model {
 					lambdas.add(random);
 				}
 				lambdas.add(left_sum);
-				pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, lambdas);
+				
+				((WrittenBellProbabilityCalculator)pc).setLambdas(lambdas);
 				double prop = calculateProplexity(test_file).stream().filter(new Predicate<Double>() {
 					@Override
 					public boolean test(Double t) {
@@ -55,7 +59,7 @@ public class Model {
 					b_lambdas = lambdas;
 				}
 			}
-			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, b_lambdas);
+			((WrittenBellProbabilityCalculator) pc).setLambdas(b_lambdas);
 		}
 	}
 	
@@ -79,8 +83,11 @@ public class Model {
 		double perplexity;
 		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
 			String line;
-
+			
+			int counter=0;
+			
 			while ((line = br.readLine()) != null) {
+				System.out.println(counter++);
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;

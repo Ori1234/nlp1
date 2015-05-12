@@ -66,8 +66,11 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 	
 	private int Tee(Ngram ngram) {
 		if (Tees.get(ngram) != null) {
+			System.out.print(".");
 			return Tees.get(ngram);
+			
 		}
+		System.out.print("/");
 		int i = 0;
 		String word;
 		Ngram tempGram;
@@ -82,6 +85,10 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		}
 		Tees.put(ngram, i);
 		return i;
+	}
+
+	public void setLambdas(List<Double> lambdas2) {
+		this.lambdas=lambdas2;		
 	}
 
 }

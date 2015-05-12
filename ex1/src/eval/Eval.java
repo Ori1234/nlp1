@@ -32,13 +32,15 @@ public class Eval {
 
 		// read model to counters.
 		Model model = loadModel(model_file, input);
-
+		
 		// read text and calculate preplexity. (for each line? for whole text?)
 		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
 		System.out.println(model_file);
 		for (double p : proplexities)
 			System.out.println(p);
+		System.out.println();
+		System.out.println(proplexities.stream().mapToDouble(Double::doubleValue).sum()/proplexities.size());
 
 	}
 
