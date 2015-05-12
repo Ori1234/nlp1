@@ -10,11 +10,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import utils.Ngram;
 import utils.SMOOTHING;
 import utils.Utils;
+import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Lm {
 
@@ -76,6 +79,51 @@ public class Lm {
 			if (smoothing == SMOOTHING.LIDSTONE){
 				writer.format("lidstone labmda=%s\n",  lidstone_LAMBDA);
 			}
+			if (smoothing==SMOOTHING.WB){
+				//generate lamdas
+				List<Double> b_lambdas = new ArrayList<Double>();
+				List<Double> lambdas;
+				double best = Double.POSITIVE_INFINITY;
+				double left_sum = 1;
+				Random rand = new Random();
+				WrittenBellProbabilityCalculator pc = new WrittenBellProbabilityCalculator(counts, counts.get(1).size(), b_lambdas);			
+				for (int i = 0; i < 10; i++) {
+					lambdas = new ArrayList<Double>();
+					left_sum = 1;
+					
+					
+					for (int k = 0; k < n-1; k++) {
+						double random = rand.nextDouble();
+						random *= left_sum;
+						left_sum -= random;
+						lambdas.add(random);
+					}
+					lambdas.add(left_sum);
+					
+					((WrittenBellProbabilityCalculator)pc).setLambdas(lambdas);
+					double prop = calculateProplexity(test_file).stream().filter(new Predicate<Double>() {
+						@Override
+						public boolean test(Double t) {
+							if (Double.isInfinite(t)) {
+								return false;
+							}
+							return true;
+						}}).mapToDouble(Double::doubleValue).sum();					
+					System.out.println("prop = " + prop);
+					if (prop < best) {
+						best = prop;
+						b_lambdas = lambdas;
+					}
+				}
+				
+				writer.print("wb labmdas=");
+				for(double l:lambdas)
+					writer.print(' '+l);
+				writer.println();
+			}
+			
+			
+			
 			
 			writer.println();
 			for (int curr_n=n;curr_n>0;curr_n--){
