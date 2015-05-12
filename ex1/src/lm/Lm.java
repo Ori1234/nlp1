@@ -108,8 +108,7 @@ public class Lm {
 						left_sum -= random;
 						lambdas.add(random);
 					}
-					lambdas.add(left_sum);
-					
+					lambdas.add(left_sum);				
 					pc.setLambdas(lambdas);
 					double prop = model.calculateProplexity(input, heldout).stream().filter(new Predicate<Double>() {
 						@Override
@@ -119,7 +118,6 @@ public class Lm {
 							}
 							return true;
 						}}).mapToDouble(Double::doubleValue).sum();					
-					System.out.println("prop = " + prop);
 					if (prop < best) {
 						best = prop;
 						b_lambdas = lambdas;
@@ -127,9 +125,13 @@ public class Lm {
 				}
 				
 				writer.print("wb labmdas=");
-				for(double l:b_lambdas)
+				System.out.println("Choose lambda for WB smoothing using cross validation:");
+				for(double l:b_lambdas){
 					writer.print(" "+l);
+					System.out.println(l);
+				}
 				writer.println();
+				
 			}
 			
 			
@@ -150,7 +152,7 @@ public class Lm {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(output);
+		System.out.println("Created model at:" + output);
 		System.out.println("DONE");
 	}
 
@@ -206,7 +208,6 @@ public class Lm {
 						counters.put(curr_ngram, count + 1);
 					}
 				}
-				System.out.print(".");			
 			}
 			System.out.println();
 		} catch (FileNotFoundException e) {

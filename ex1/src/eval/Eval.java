@@ -43,9 +43,6 @@ public class Eval {
 		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
 		System.out.println(model_file);
-		for (double p : proplexities)
-			System.out.println(p);
-		System.out.println();
 		System.out.println(proplexities.stream().filter(new Predicate<Double>() {
 			@Override
 			public boolean test(Double t) {
@@ -53,7 +50,7 @@ public class Eval {
 					return false;
 				}
 				return true;
-			}}).mapToDouble(Double::doubleValue).sum()/proplexities.size());
+			}}).mapToDouble(Double::doubleValue).average());
 
 	}
 
