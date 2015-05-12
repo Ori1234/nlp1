@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -24,7 +25,7 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Eval {
 
-	public static void main(String[] args) {
+	public static OptionalDouble main(String[] args) {
 		Map<String, String> params = Utils.parseARGS(args); // sets glabals
 
 		String input = params.get("-i");
@@ -43,15 +44,19 @@ public class Eval {
 		// String text = null;
 		List<Double> proplexities = model.calculateProplexity(input);
 		System.out.println(model_file);
-		System.out.println(proplexities.stream().filter(new Predicate<Double>() {
+		
+		
+		OptionalDouble average_proplexity = proplexities.stream().filter(new Predicate<Double>() {
 			@Override
 			public boolean test(Double t) {
 				if (Double.isInfinite(t)) {
 					return false;
 				}
 				return true;
-			}}).mapToDouble(Double::doubleValue).average());
+			}}).mapToDouble(Double::doubleValue).average();
+		System.out.println(average_proplexity);
 
+		return average_proplexity;
 	}
 
 	public enum SECTION {
