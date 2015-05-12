@@ -1,5 +1,6 @@
 package utils.ProbabilityCalculators;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,8 @@ import utils.Ngram;
 public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 	int vocabulary_size;
 	List<Double> lambdas;
+	int corpus_size;
+	Map<Ngram, Integer> Tees;
 	
 	public WrittenBellProbabilityCalculator(
 			Map<Integer, Map<Ngram, Integer>> counters, int vocabulary_size,
@@ -16,6 +19,12 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		this.vocabulary_size = vocabulary_size;
 		this.counters = counters;
 		this.lambdas = lambdas;
+		int count = 0;
+		for (Ngram oneGram : counters.get(1).keySet()) {
+			count += counters.get(1).get(oneGram);
+		}
+		this.corpus_size = count;
+		this.Tees = new HashMap<Ngram, Integer>();
 	}
 
 	@Override
@@ -27,12 +36,8 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		int denominator;
 		while (ngram.n() > 0) {
 			if (ngram.n() == 1) {
-				if (counters.get(ngram.n()).get(ngram) != null) {
-					count = 0;
-					for (Ngram oneGram : counters.get(1).keySet()) {
-						count += counters.get(1).get(oneGram);
-					}
-					prob += (counters.get(ngram.n()).get(ngram) / (double)count) * lambdas.get(index);
+				if (counters.get(ngram.n()).get(ngram) != null)  {
+					prob += (counters.get(ngram.n()).get(ngram) / (double)corpus_size) * lambdas.get(index);
 				}
 			} else {
 				int nt;
@@ -60,6 +65,9 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 	}
 	
 	private int Tee(Ngram ngram) {
+		if (Tees.get(ngram) != null) {
+			return Tees.get(ngram);
+		}
 		int i = 0;
 		String word;
 		Ngram tempGram;
@@ -72,6 +80,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 				i += 1;
 			}
 		}
+		Tees.put(ngram, i);
 		return i;
 	}
 
