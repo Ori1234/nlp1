@@ -134,13 +134,13 @@ public class Eval {
 		// TODO check that data have required fields
 		ProbabilityCalculator pc;
 		if (data.get("smoothing").equals(SMOOTHING.LIDSTONE.toString())) {
-			pc = new LindstonProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary_size")), Double.parseDouble(data.get("lidstone labmda")));
+			pc = new LindstonProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary size")), Double.parseDouble(data.get("lidstone labmda")));
 		} else {
 			List<Double> lambdas = new ArrayList<Double>();
 			for (String l : data.get("wb labmdas").split(" ")) {
 				lambdas.add(Double.parseDouble(l));
 			}
-			pc = new WrittenBellProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary_size")), lambdas);
+			pc = new WrittenBellProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary size")), lambdas);
 		}
 
 		return new Model(max(counters.keySet()), pc);

@@ -23,11 +23,16 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 public class Lm {
 	
 	 
-		private static final double HELDOUT_PERCENTEGE = 0.05;
+		private static final double HELDOUT_PERCENTEGE = 0.001;
 		static Random random = new Random();
-		static List<Integer> heldout = new ArrayList<Integer>();
 	
-
+		
+		/*	
+		-i data/en_text.corp
+		-o data/model.lm
+		-n 3
+		-s wb
+			*/
 	public static void main(String[] args) {
 		
 
@@ -58,17 +63,15 @@ public class Lm {
 			lidstone_LAMBDA = Double.parseDouble(params.get("-lmbd"));
 		}
 		
-		
-/*		//COMMENT OUT IF NOT DEBUG
-		input = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en.test";
-		input = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\en_text.corp";
-		output = "C:\\Users\\OriTerner\\git\\nlp\\ex1\\data\\model.lm";
-		n = 3;
-		smoothing= "";
-	*/
+	
 		
 		// read file and count ngrams		
 		Map<Integer,Map<Ngram,Integer>> counts=new HashMap<Integer, Map<Ngram,Integer>>();
+		List<Integer> heldout=null;
+		if (smoothing==SMOOTHING.WB){
+			heldout = new ArrayList<Integer>();
+		}			
+		
 		for (int curr_n=n;curr_n>0;curr_n--){
 			Map<Ngram, Integer> counters = countNgrams(curr_n,input,heldout);
 			counts.put(curr_n, counters);
@@ -94,7 +97,7 @@ public class Lm {
 				Random rand = new Random();
 				WrittenBellProbabilityCalculator pc = new WrittenBellProbabilityCalculator(counts, counts.get(1).size(), b_lambdas);
 				Model model = new Model(n, pc);
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 50; i++) {
 					lambdas = new ArrayList<Double>();
 					left_sum = 1;
 					
@@ -125,7 +128,7 @@ public class Lm {
 				
 				writer.print("wb labmdas=");
 				for(double l:b_lambdas)
-					writer.print(' '+l);
+					writer.print(" "+l);
 				writer.println();
 			}
 			
@@ -163,7 +166,7 @@ public class Lm {
 		writer.println();
 	}
 	
-	private static Map<Ngram, Integer> countNgrams(int n, String input, List<Integer> indexs) {
+	private static Map<Ngram, Integer> countNgrams(int n, String input, List<Integer> heldout) {
 		Map<Ngram, Integer> counters = new HashMap<>();
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(input))) {
@@ -171,7 +174,7 @@ public class Lm {
 			Integer line_nu = 0;
 			while ((line = br.readLine()) != null) {
 				
-				if (random.nextDouble() < HELDOUT_PERCENTEGE){
+				if (heldout!=null && random.nextDouble() < HELDOUT_PERCENTEGE){
 					heldout.add(line_nu++);
 					continue;
 				}

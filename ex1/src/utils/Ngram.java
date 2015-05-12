@@ -89,6 +89,12 @@ public class Ngram {
 		words_1.remove(words.size()-1);
 		return new Ngram(words_1);
 	}
+	
+	public Ngram remove_first_word() {
+		List<String> words_1= new ArrayList<String>(words);
+		words_1.remove(0);
+		return new Ngram(words_1);
+	}
 
 	public int n() {
 		if (n==0){

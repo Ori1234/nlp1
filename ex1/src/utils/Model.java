@@ -46,12 +46,15 @@ public class Model {
 			ArrayList<String> lines = new ArrayList<String>();
 			Iterator<String> iter = br.lines().iterator();//.collect(Collectors.toList());
 			Integer i = 0;
+			if (indexes == null) {
+				return calculateProplexityForLines(lines);
+			}
 			while (iter.hasNext()) {
-				if (!indexes.contains(i)) {
+				if (indexes.contains(i++)) {
 					lines.add(iter.next());
+				} else {
+					iter.next();
 				}
-				iter.next();
-				i++;
 			}
 			return calculateProplexityForLines(lines);
 		} catch (FileNotFoundException e) {
@@ -112,7 +115,7 @@ public class Model {
 				}
 				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
 //				System.out.println(perplexity);
-				proplexities.add(perplexity);
+				proplexities.add(perplexity);				
 			}
 		return proplexities;
 	}

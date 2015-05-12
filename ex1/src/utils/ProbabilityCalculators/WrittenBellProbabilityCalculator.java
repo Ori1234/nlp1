@@ -27,42 +27,47 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		this.Tees = new HashMap<Ngram, Integer>();
 	}
 
+	
+	
 	@Override
 	public Double calculateProbability(Ngram ngram) {
-		Integer count = 0;
-		int index = 0;
-		double prob = 0;
-		int numerator;
-		int denominator;
-		while (ngram.n() > 0) {
+		double res=0;
+		for (int i=0;i<ngram.n();i++){
+			res+=lambdas.get(i)*calculateProbabilityBeforeInterpulation(ngram);
+			ngram=ngram.remove_first_word();
+		}
+		return res;
+	}
+		private Double calculateProbabilityBeforeInterpulation(Ngram ngram) {
+			Integer count = 0;
+			int numerator;
+			int denominator;
 			if (ngram.n() == 1) {
-				if (counters.get(ngram.n()).get(ngram) != null)  {
-					prob += (counters.get(ngram.n()).get(ngram) / (double)corpus_size) * lambdas.get(index);
-				}
-			} else {
-				int nt;
-				int tee = Tee(ngram.remove_last_word());
-				if (counters.get(ngram.n()).get(ngram.remove_last_word()) == null) {
-					nt = tee;
+				if (counters.get(1).get(ngram) != null)  {
+					return ((double)(counters.get(1).get(ngram)) / (double)corpus_size);
 				} else {
-					nt = (counters.get(ngram.n()).get(ngram.remove_last_word()) + tee);
+					return (double) 0;
 				}
+			} else {				
+				Integer N =  counters.get(ngram.n()-1).get(ngram.remove_last_word());
+				if (N==null){
+					return 0.0;
+				}
+								
+				int T = Tee(ngram.remove_last_word());
+				int Z = vocabulary_size - T;
+				
 				if ((count = counters.get(ngram.n()).get(ngram)) == null) {
-					numerator = tee;
-					denominator = (vocabulary_size - tee) * nt;
+					numerator = T;
+					denominator = Z * (N + T);
 				} else {
 					numerator = count;
-					denominator = nt;
+					denominator = N + T;
 				}
-				if (numerator != 0) {
-					prob += lambdas.get(index) * (double)numerator / (double)denominator;
-				}
+				return ((double)numerator / (double)denominator);
 			}
-			index++;
-			ngram = ngram.remove_last_word();
 		}
-		return prob;
-	}
+		
 	
 	private int Tee(Ngram ngram) {
 		if (Tees.get(ngram) != null) {
