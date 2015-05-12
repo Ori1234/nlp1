@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,9 @@ import utils.Model;
 import utils.Ngram;
 import utils.SMOOTHING;
 import utils.Utils;
+import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
+import utils.ProbabilityCalculators.ProbabilityCalculator;
+import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Eval {
 
@@ -127,14 +132,18 @@ public class Eval {
 		}
 
 		// TODO check that data have required fields
+		ProbabilityCalculator pc;
+		if (data.get("smoothing").equals(SMOOTHING.LIDSTONE.toString())) {
+			pc = new LindstonProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary_size")), Double.parseDouble(data.get("lidstone labmda")));
+		} else {
+			List<Double> lambdas = new ArrayList<Double>();
+			for (String l : data.get("wb labmdas").split(" ")) {
+				lambdas.add(Double.parseDouble(l));
+			}
+			pc = new WrittenBellProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary_size")), lambdas);
+		}
 
-		return new Model(counters,
-				Integer.parseInt(data.get("vucabulary size")),
-				max(counters.keySet()), (data.get("smoothing").equals(
-						SMOOTHING.LIDSTONE.toString()) ? SMOOTHING.LIDSTONE
-						: SMOOTHING.WB), (data.get("smoothing").equals(
-								SMOOTHING.LIDSTONE.toString())) ? Double.parseDouble(data
-						.get("lidstone labmda")) : 1, test_file);
+		return new Model(max(counters.keySet()), pc);
 	}
 
 	private static int max(Set<Integer> keySet) {

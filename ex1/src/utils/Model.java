@@ -5,10 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
 import utils.ProbabilityCalculators.ProbabilityCalculator;
@@ -20,47 +22,9 @@ public class Model {
 	Map<Ngram, Double> probablities;
 
 	
-	public Model(Map<Integer,Map<Ngram,Integer>> counters,int vucabelary_size,int n,SMOOTHING smoothing_type, double LAMBDA, String test_file){
+	public Model(int n, ProbabilityCalculator pc){
 		this.n=n;
-		if (smoothing_type==SMOOTHING.LIDSTONE){
-			pc=new LindstonProbabilityCalculator(counters,vucabelary_size,LAMBDA);
-		}else{
-			List<Double> b_lambdas = new ArrayList<Double>();
-			List<Double> lambdas;
-			double best = Double.POSITIVE_INFINITY;
-			double left_sum = 1;
-			Random rand = new Random();
-			pc = new WrittenBellProbabilityCalculator(counters, vucabelary_size, b_lambdas);			
-			for (int i = 0; i < 10; i++) {
-				lambdas = new ArrayList<Double>();
-				left_sum = 1;
-				
-				
-				for (int k = 0; k < n-1; k++) {
-					double random = rand.nextDouble();
-					random *= left_sum;
-					left_sum -= random;
-					lambdas.add(random);
-				}
-				lambdas.add(left_sum);
-				
-				((WrittenBellProbabilityCalculator)pc).setLambdas(lambdas);
-				double prop = calculateProplexity(test_file).stream().filter(new Predicate<Double>() {
-					@Override
-					public boolean test(Double t) {
-						if (Double.isInfinite(t)) {
-							return false;
-						}
-						return true;
-					}}).mapToDouble(Double::doubleValue).sum();
-				System.out.println("prop = " + prop);
-				if (prop < best) {
-					best = prop;
-					b_lambdas = lambdas;
-				}
-			}
-			((WrittenBellProbabilityCalculator) pc).setLambdas(b_lambdas);
-		}
+		this.pc = pc;
 	}
 	
 	// Lazy implementation
@@ -76,17 +40,51 @@ public class Model {
 		}
 		return a;
 	}
-
+	
+	public List<Double> calculateProplexity(String text, List<Integer> indexes) {
+		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
+			ArrayList<String> lines = new ArrayList<String>();
+			Iterator<String> iter = br.lines().iterator();//.collect(Collectors.toList());
+			Integer i = 0;
+			while (iter.hasNext()) {
+				if (!indexes.contains(i)) {
+					lines.add(iter.next());
+				}
+				iter.next();
+				i++;
+			}
+			return calculateProplexityForLines(lines);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public List<Double> calculateProplexity(String text) {
+		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
+			List<String> lines = br.lines().collect(Collectors.toList());
+			return calculateProplexityForLines(lines);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public List<Double> calculateProplexityForLines(List<String> lines) {
 		double sumOfLogs = 0;
 		List<Double> proplexities = new ArrayList<Double>();
 		double perplexity;
-		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
-			String line;
-			
 			int counter=0;
 			
-			while ((line = br.readLine()) != null) {
+			for (String line : lines) {
 				System.out.println(counter++);
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
@@ -116,14 +114,6 @@ public class Model {
 //				System.out.println(perplexity);
 				proplexities.add(perplexity);
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block //TODO print to user bad input
-			// file name
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return proplexities;
 	}
 }

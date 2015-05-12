@@ -14,12 +14,19 @@ import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
+import utils.Model;
 import utils.Ngram;
 import utils.SMOOTHING;
 import utils.Utils;
 import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Lm {
+	
+	 
+		private static final double HELDOUT_PERCENTEGE = 0.05;
+		static Random random = new Random();
+		static List<Integer> heldout = new ArrayList<Integer>();
+	
 
 	public static void main(String[] args) {
 		
@@ -59,14 +66,13 @@ public class Lm {
 		n = 3;
 		smoothing= "";
 	*/
-			
+		
 		// read file and count ngrams		
 		Map<Integer,Map<Ngram,Integer>> counts=new HashMap<Integer, Map<Ngram,Integer>>();
 		for (int curr_n=n;curr_n>0;curr_n--){
-			Map<Ngram, Integer> counters = countNgrams(curr_n,input);
+			Map<Ngram, Integer> counters = countNgrams(curr_n,input,heldout);
 			counts.put(curr_n, counters);
 		}
-				
 		// write model
 		try (PrintWriter writer = new PrintWriter(output, "UTF-8")) {
 			writer.println("\\data\\");
@@ -86,7 +92,8 @@ public class Lm {
 				double best = Double.POSITIVE_INFINITY;
 				double left_sum = 1;
 				Random rand = new Random();
-				WrittenBellProbabilityCalculator pc = new WrittenBellProbabilityCalculator(counts, counts.get(1).size(), b_lambdas);			
+				WrittenBellProbabilityCalculator pc = new WrittenBellProbabilityCalculator(counts, counts.get(1).size(), b_lambdas);
+				Model model = new Model(n, pc);
 				for (int i = 0; i < 10; i++) {
 					lambdas = new ArrayList<Double>();
 					left_sum = 1;
@@ -100,8 +107,8 @@ public class Lm {
 					}
 					lambdas.add(left_sum);
 					
-					((WrittenBellProbabilityCalculator)pc).setLambdas(lambdas);
-					double prop = calculateProplexity(test_file).stream().filter(new Predicate<Double>() {
+					pc.setLambdas(lambdas);
+					double prop = model.calculateProplexity(input, heldout).stream().filter(new Predicate<Double>() {
 						@Override
 						public boolean test(Double t) {
 							if (Double.isInfinite(t)) {
@@ -117,7 +124,7 @@ public class Lm {
 				}
 				
 				writer.print("wb labmdas=");
-				for(double l:lambdas)
+				for(double l:b_lambdas)
 					writer.print(' '+l);
 				writer.println();
 			}
@@ -156,13 +163,19 @@ public class Lm {
 		writer.println();
 	}
 	
-	private static Map<Ngram, Integer> countNgrams(int n, String input) {
+	private static Map<Ngram, Integer> countNgrams(int n, String input, List<Integer> indexs) {
 		Map<Ngram, Integer> counters = new HashMap<>();
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(input))) {
 			String line;
-
+			Integer line_nu = 0;
 			while ((line = br.readLine()) != null) {
+				
+				if (random.nextDouble() < HELDOUT_PERCENTEGE){
+					heldout.add(line_nu++);
+					continue;
+				}
+				line_nu++;
 				String pattern = "[\\p{Punct}\\s]+";
 				line=line.replaceFirst(pattern, ""); //needed because java's split returns an empty string at beginning of split if line starts with pattern. 
 				String[] line_words = line.split(pattern);
