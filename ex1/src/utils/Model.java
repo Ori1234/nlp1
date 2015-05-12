@@ -84,20 +84,14 @@ public class Model {
 	public List<Double> calculateProplexityForLines(List<String> lines) {
 		double sumOfLogs = 0;
 		List<Double> proplexities = new ArrayList<Double>();
-		double perplexity;
-			int counter=0;
-			
-			for (String line : lines) {
-				System.out.println(counter++);
+		double perplexity;						
+			for (String line : lines) {				
 				String pattern = "[\\p{Punct}\\s]+";
 				String[] line_words = line.split(pattern);
 				int len = line_words.length;
 				sumOfLogs = 0;
-				// does this go over ngrams in different lines? should it?
 				for (int i = -1; i < len+1; i++) {
-					Ngram curr_ngram = new Ngram();
-					
-					// what happens if the line is too short?  //shouldn't be a problem
+					Ngram curr_ngram = new Ngram();				
 					for (int j = i -n +1 ; j <= i; j++) {   //+1
 						if (j<0){
 							curr_ngram.add_word(Ngram.START);
@@ -106,15 +100,13 @@ public class Model {
 						}else{
 							curr_ngram.add_word(line_words[j]);
 						}
-					}
-					
+					}					
 					if (curr_ngram.n()!=n){
 						System.out.println("huston we have a problem");
 					}
 					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
 				}
 				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
-//				System.out.println(perplexity);
 				proplexities.add(perplexity);				
 			}
 		return proplexities;

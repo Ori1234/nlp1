@@ -32,10 +32,10 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 	@Override
 	public Double calculateProbability(Ngram ngram) {
 		double res=0;
-		for (int i=0;i<ngram.n();i++){
+		for (int i=0;i<lambdas.size();i++){
 			res+=lambdas.get(i)*calculateProbabilityBeforeInterpulation(ngram);
 			ngram=ngram.remove_first_word();
-		}
+		}	
 		return res;
 	}
 		private Double calculateProbabilityBeforeInterpulation(Ngram ngram) {
@@ -70,12 +70,10 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		
 	
 	private int Tee(Ngram ngram) {
-		if (Tees.get(ngram) != null) {
-			System.out.print(".");
+		if (Tees.get(ngram) != null) {			
 			return Tees.get(ngram);
 			
 		}
-		System.out.print("/");
 		int i = 0;
 		String word;
 		Ngram tempGram;
