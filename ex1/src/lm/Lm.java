@@ -209,7 +209,6 @@ public class Lm {
 					}
 				}
 			}
-			System.out.println();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block //TODO print to user bad input
 			// file name

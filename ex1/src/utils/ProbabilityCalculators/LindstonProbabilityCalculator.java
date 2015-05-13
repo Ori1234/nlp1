@@ -19,7 +19,6 @@ public class LindstonProbabilityCalculator extends ProbabilityCalculator {
 
 	@Override
 	public Double calculateProbability(Ngram ngram) {
-		// TODO Auto-generated method stub
 		Integer ngram_count = counters.get(ngram.n()).get(ngram);
 		double numenator = (ngram_count == null ? 0 : ngram_count) + LAMBDA;
 		Integer ngram_n_1_count = counters.get(ngram.n() - 1).get(

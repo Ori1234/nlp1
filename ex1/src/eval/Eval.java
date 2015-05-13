@@ -25,7 +25,9 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Eval {
 
-	public static OptionalDouble main(String[] args) {
+	private static final Double VERY_BIG = 1000000000.0;
+
+	public static void main(String[] args) {
 		Map<String, String> params = Utils.parseARGS(args); // sets glabals
 
 		String input = params.get("-i");
@@ -37,6 +39,10 @@ public class Eval {
 			throw new IllegalArgumentException("missing required flag -m");
 		}
 
+		System.out.println("average proplexity on "+ input+" lines= "+evalTextByModel(input, model_file));
+	}
+
+	public static double evalTextByModel(String input, String model_file) {
 		// read model to counters.
 		Model model = loadModel(model_file, input);
 		
@@ -45,18 +51,28 @@ public class Eval {
 		List<Double> proplexities = model.calculateProplexity(input);
 		System.out.println(model_file);
 		
-		
 		OptionalDouble average_proplexity = proplexities.stream().filter(new Predicate<Double>() {
 			@Override
 			public boolean test(Double t) {
-				if (Double.isInfinite(t)) {
+				if (Double.isInfinite(t)) {					
 					return false;
+					
 				}
 				return true;
 			}}).mapToDouble(Double::doubleValue).average();
+		
+		average_proplexity =proplexities.stream().map(p -> {
+			if (Double.isInfinite(p)){
+				return VERY_BIG;
+			}else {
+				return p;
+				}
+		}).mapToDouble(Double::doubleValue).average();
+		
+		
 		System.out.println(average_proplexity);
 
-		return average_proplexity;
+		return average_proplexity.getAsDouble();
 	}
 
 	public enum SECTION {

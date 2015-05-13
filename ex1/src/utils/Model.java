@@ -21,15 +21,15 @@ public class Model {
 	int n;
 	Map<Ngram, Double> probablities;
 
-	
-	public Model(int n, ProbabilityCalculator pc){
-		this.n=n;
+	public Model(int n, ProbabilityCalculator pc) {
+		this.n = n;
 		this.pc = pc;
 	}
-	
+
 	// Lazy implementation
 	/**
 	 * get probability of Ngram after smoothing
+	 * 
 	 * @param ngram
 	 * @return
 	 */
@@ -40,11 +40,11 @@ public class Model {
 		}
 		return a;
 	}
-	
+
 	public List<Double> calculateProplexity(String text, List<Integer> indexes) {
 		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
 			ArrayList<String> lines = new ArrayList<String>();
-			Iterator<String> iter = br.lines().iterator();//.collect(Collectors.toList());
+			Iterator<String> iter = br.lines().iterator();// .collect(Collectors.toList());
 			Integer i = 0;
 			if (indexes == null) {
 				return calculateProplexityForLines(lines);
@@ -66,7 +66,7 @@ public class Model {
 		}
 		return null;
 	}
-	
+
 	public List<Double> calculateProplexity(String text) {
 		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
 			List<String> lines = br.lines().collect(Collectors.toList());
@@ -84,31 +84,39 @@ public class Model {
 	public List<Double> calculateProplexityForLines(List<String> lines) {
 		double sumOfLogs = 0;
 		List<Double> proplexities = new ArrayList<Double>();
-		double perplexity;						
-			for (String line : lines) {				
-				String pattern = "[\\p{Punct}\\s]+";
-				String[] line_words = line.split(pattern);
-				int len = line_words.length;
-				sumOfLogs = 0;
-				for (int i = -1; i < len+1; i++) {
-					Ngram curr_ngram = new Ngram();				
-					for (int j = i -n +1 ; j <= i; j++) {   //+1
-						if (j<0){
-							curr_ngram.add_word(Ngram.START);
-						}else if(j==len){
-							curr_ngram.add_word(Ngram.END);						
-						}else{
-							curr_ngram.add_word(line_words[j]);
-						}
-					}					
-					if (curr_ngram.n()!=n){
-						System.out.println("huston we have a problem");
+		for (String line : lines) {
+			String pattern = "[\\p{Punct}\\s]+";
+			String[] line_words = line.split(pattern);
+			int len = line_words.length;
+			sumOfLogs = 0;
+			for (int i = -1; i < len + 1; i++) {
+				Ngram curr_ngram = new Ngram();
+				for (int j = i - n + 1; j <= i; j++) { // +1
+					if (j < 0) {
+						curr_ngram.add_word(Ngram.START);
+					} else if (j == len) {
+						curr_ngram.add_word(Ngram.END);
+					} else {
+						curr_ngram.add_word(line_words[j]);
 					}
-					sumOfLogs += Math.log(pc.calculateProbability(curr_ngram));
 				}
-				perplexity = Math.pow(Math.pow(Math.E, sumOfLogs), -(1/(double)len));
-				proplexities.add(perplexity);				
+				Double calculateProbability = pc
+						.calculateProbability(curr_ngram);
+				// System.o1ut.println(curr_ngram + " " + calculateProbability);
+				sumOfLogs += Math.log(calculateProbability);
+
 			}
+			// System.out.println(sumOfLogs);
+			double logPerplexity = -(sumOfLogs / len + 2);
+
+			double perplexity = Math.pow(Math.E, logPerplexity);
+			if (Double.isInfinite(perplexity)) {
+				System.err.println("perplexity =  " + perplexity);
+				System.err.println();
+				System.err.println();
+			}
+			proplexities.add(perplexity);
+		}
 		return proplexities;
 	}
 }
