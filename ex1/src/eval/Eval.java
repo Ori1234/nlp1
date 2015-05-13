@@ -5,15 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import utils.Model;
 import utils.Ngram;
@@ -25,10 +24,9 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Eval {
 
-	private static final Double VERY_BIG = 1000000000.0;
-
 	public static void main(String[] args) {
-		Map<String, String> params = Utils.parseARGS(args); // sets glabals
+		
+		Map<String, String> params = Utils.parseARGS(args);
 
 		String input = params.get("-i");
 		if (input == null) {
@@ -38,37 +36,32 @@ public class Eval {
 		if (model_file == null) {
 			throw new IllegalArgumentException("missing required flag -m");
 		}
-
-		System.out.println("average proplexity on "+ input+" lines= "+evalTextByModel(input, model_file));
+		
+		double averagePerplexity = evalTextByModel(input, model_file);
+		System.out.println("average proplexity on "+ input+" lines= "+averagePerplexity);
 	}
 
+	
 	public static double evalTextByModel(String input, String model_file) {
-		// read model to counters.
-		Model model = loadModel(model_file, input);
+		// read model from model file
+		Model model = loadModel(model_file);
 		
-		// read text and calculate preplexity. (for each line? for whole text?)
-		// String text = null;
-		List<Double> proplexities = model.calculateProplexity(input);
-		System.out.println(model_file);
+		List<Double> proplexities=new ArrayList<Double>();
+		// read input text and calculate perplexity for each line in text.
+		try (BufferedReader br = new BufferedReader(new FileReader(input))) {			
+			String line;
+			while ((line = br.readLine()) != null) {
+			proplexities.add(model.calculateProplexity(line));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		OptionalDouble average_proplexity = proplexities.stream().filter(new Predicate<Double>() {
-			@Override
-			public boolean test(Double t) {
-				if (Double.isInfinite(t)) {					
-					return false;
-					
-				}
-				return true;
-			}}).mapToDouble(Double::doubleValue).average();
+		//System.out.println(model_file);
 		
-		average_proplexity =proplexities.stream().map(p -> {
-			if (Double.isInfinite(p)){
-				return VERY_BIG;
-			}else {
-				return p;
-				}
-		}).mapToDouble(Double::doubleValue).average();
-		
+		//Average all perplexity values for model evaluation.
+		OptionalDouble average_proplexity =proplexities.stream().mapToDouble(Double::doubleValue).average();
 		
 		System.out.println(average_proplexity);
 
@@ -79,11 +72,10 @@ public class Eval {
 		DATA, N_GRAM, UNKNOWN;
 	}
 
-	// TODO complete implementation
-	private static Model loadModel(String model_file, String test_file) {
+	
+	private static Model loadModel(String model_file) {
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
-		Map<String, String> data = new HashMap<String, String>();
-		int max_n = 0;
+		Map<String, String> data = new HashMap<String, String>();		
 		try (BufferedReader br = new BufferedReader(new FileReader(model_file))) {
 			String line;
 			int n = 0;

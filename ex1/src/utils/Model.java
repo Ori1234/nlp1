@@ -8,30 +8,32 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import utils.ProbabilityCalculators.LindstonProbabilityCalculator;
 import utils.ProbabilityCalculators.ProbabilityCalculator;
-import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Model {
 	ProbabilityCalculator pc; // (lidstone/WB)
 	int n;
 	Map<Ngram, Double> probablities;
 
+	/**
+	 * class constructor
+	 * @param n : ngr 
+	 * @param pc 
+	 */
 	public Model(int n, ProbabilityCalculator pc) {
 		this.n = n;
 		this.pc = pc;
 	}
 
-	// Lazy implementation
+	
 	/**
 	 * get probability of Ngram after smoothing
+	 * Lazy implementaion.
 	 * 
 	 * @param ngram
-	 * @return
+	 * @return smoothed model probability
 	 */
 	public double getProbability(Ngram ngram) {
 		Double a;
@@ -41,82 +43,45 @@ public class Model {
 		return a;
 	}
 
-	public List<Double> calculateProplexity(String text, List<Integer> indexes) {
-		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
-			ArrayList<String> lines = new ArrayList<String>();
-			Iterator<String> iter = br.lines().iterator();// .collect(Collectors.toList());
-			Integer i = 0;
-			if (indexes == null) {
-				return calculateProplexityForLines(lines);
-			}
-			while (iter.hasNext()) {
-				if (indexes.contains(i++)) {
-					lines.add(iter.next());
-				} else {
-					iter.next();
-				}
-			}
-			return calculateProplexityForLines(lines);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
 
-	public List<Double> calculateProplexity(String text) {
-		try (BufferedReader br = new BufferedReader(new FileReader(text))) {
-			List<String> lines = br.lines().collect(Collectors.toList());
-			return calculateProplexityForLines(lines);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public List<Double> calculateProplexityForLines(List<String> lines) {
+	
+	public double calculateProplexity(String text_line) {
 		double sumOfLogs = 0;
-		List<Double> proplexities = new ArrayList<Double>();
-		for (String line : lines) {
-			String pattern = "[\\p{Punct}\\s]+";
-			String[] line_words = line.split(pattern);
-			int len = line_words.length;
-			sumOfLogs = 0;
-			for (int i = -1; i < len + 1; i++) {
-				Ngram curr_ngram = new Ngram();
-				for (int j = i - n + 1; j <= i; j++) { // +1
-					if (j < 0) {
-						curr_ngram.add_word(Ngram.START);
-					} else if (j == len) {
-						curr_ngram.add_word(Ngram.END);
-					} else {
-						curr_ngram.add_word(line_words[j]);
-					}
+		String pattern = "[\\p{Punct}\\s]+";
+		String[] line_words = text_line.split(pattern);
+		int len = line_words.length;
+		sumOfLogs = 0;
+
+		//iterate all ngrams in text_line
+		for (int i = -1; i < len + 1; i++) {
+			
+			Ngram curr_ngram = new Ngram();
+			for (int j = i - this.n + 1; j <= i; j++) { // +1
+				if (j < 0) {
+					curr_ngram.add_word(Ngram.START);
+				} else if (j == len) {
+					curr_ngram.add_word(Ngram.END);
+				} else {
+					curr_ngram.add_word(line_words[j]);
 				}
-				Double calculateProbability = pc
-						.calculateProbability(curr_ngram);
-				// System.o1ut.println(curr_ngram + " " + calculateProbability);
-				sumOfLogs += Math.log(calculateProbability);
-
 			}
-			// System.out.println(sumOfLogs);
-			double logPerplexity = -(sumOfLogs / len + 2);
+			Double calculateProbability = pc
+					.calculateProbability(curr_ngram);
+			System.out.println(curr_ngram + " " + calculateProbability);
+			sumOfLogs += Math.log(calculateProbability);
 
-			double perplexity = Math.pow(Math.E, logPerplexity);
-			if (Double.isInfinite(perplexity)) {
-				System.err.println("perplexity =  " + perplexity);
-				System.err.println();
-				System.err.println();
-			}
-			proplexities.add(perplexity);
 		}
-		return proplexities;
+		
+		double logPerplexity = -(sumOfLogs / len + 2);
+
+		double perplexity = Math.pow(Math.E, logPerplexity);
+		//if (Double.isInfinite(perplexity)) {
+			System.out.println(sumOfLogs);
+			System.err.println("perplexity =  " + perplexity);
+			System.err.println();
+			System.err.println();
+		//}
+		return perplexity;
 	}
+
 }

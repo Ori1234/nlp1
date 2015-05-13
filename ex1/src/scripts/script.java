@@ -2,8 +2,6 @@ package scripts;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.OptionalDouble;
-
 import eval.Eval;
 import lm.Lm;
 
@@ -28,7 +26,7 @@ public class script {
 
 					String[] a1 = { "-i", input_corpus, "-o", model, "-n",
 							Integer.toString(n), "-s", "ls","-lmbd",Double.toString(lmbd)};
-					String[] a2 = { "-i", input_test, "-m", model };
+					//String[] a2 = { "-i", input_test, "-m", model };
 
 					System.out.println("####calc model " + lang + " " + n + " " + lmbd);
 					Lm.main(a1);
@@ -88,7 +86,7 @@ public class script {
 
 				String[] a1 = { "-i", input_corpus, "-o", model, "-n",
 						Integer.toString(n), "-s", "wb" };
-				String[] a2 = { "-i", input_test, "-m", model };
+				//String[] a2 = { "-i", input_test, "-m", model };
 
 				System.out.println("****calc model " + lang + " " + n);
 				Lm.main(a1);
