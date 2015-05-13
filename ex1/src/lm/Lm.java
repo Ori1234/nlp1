@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
-
 import utils.Model;
 import utils.Ngram;
 import utils.SMOOTHING;
@@ -22,7 +20,7 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Lm {
 
-	private static final double HELDOUT_PERCENTEGE = 0.01;
+	private static final double HELDOUT_PERCENTEGE = 0.001;
 	static Random random = new Random();
 
 	/*
@@ -65,7 +63,7 @@ public class Lm {
 			heldout = new ArrayList<Integer>();
 		}
 		
-		System.out.println("Counting n-grams...");
+		System.out.println("Counting n-grams in corpus...");
 		for (int curr_n = n; curr_n > 0; curr_n--) {
 			System.out.println("N = "+curr_n);
 			Map<Ngram, Integer> counters = countNgrams(curr_n, input, heldout);
@@ -89,9 +87,11 @@ public class Lm {
 
 			if (smoothing == SMOOTHING.WB) {
 				// generate lamdas
+				
 				System.out
-				.print("calculating lambdas for WB smoothing using cross validation");
-		
+				.println("calculating lambdas for WB smoothing on heldout text from corpus...");
+				System.out.println("size of heldout text:"+heldout.size()+" lines of text");
+				
 				List<Double> b_lambdas = findBestWBParams(n, counts, heldout,
 						input);
 				
@@ -100,9 +100,10 @@ public class Lm {
 				writer.print("wb labmdas=");
 				System.out
 						.println("calculated lambdas:");
+				int decs=n;
 				for (double l : b_lambdas) {
 					writer.print(" " + l);
-					System.out.println(l);
+					System.out.println("lambd"+decs--+":"+l);
 				}
 				writer.println();
 			}
@@ -154,11 +155,12 @@ public class Lm {
 				String line;
 				int counter = 0;
 				while ((line = br.readLine()) != null) {
-					//if (heldout.contains(counter++)){
-						counter++;
+					if (heldout.contains(counter++)){
+						if (i==0){
+							System.out.print(".");
+						}
 						perplexities.add(model.calculateProplexity(line));
-						System.out.println(counter);
-					//}
+					}
 				}
 
 				double prop = perplexities.stream()

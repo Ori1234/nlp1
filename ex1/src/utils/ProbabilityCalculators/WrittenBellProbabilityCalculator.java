@@ -36,6 +36,8 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 			res+=lambdas.get(i)*calculateProbabilityBeforeInterpulation(ngram);
 			ngram=ngram.remove_first_word();
 		}	
+		//a dirty fix to prevent probability to be 0 (eg can happens when all words are unknowns)
+		res=(res==0? 0.000001 : res);
 		return res;
 	}
 		private Double calculateProbabilityBeforeInterpulation(Ngram ngram) {
