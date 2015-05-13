@@ -20,7 +20,8 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Lm {
 
-	private static final double HELDOUT_PERCENTEGE = 0.001;
+	private static final double HELDOUT_PERCENTEGE = 0.003;
+	private static final int NUM_OF_DRAWS_FOR_WB_LAMBDAS = 200;
 	static Random random = new Random();
 
 	/*
@@ -134,7 +135,7 @@ public class Lm {
 		WrittenBellProbabilityCalculator pc = new WrittenBellProbabilityCalculator(
 				counts, counts.get(1).size(), b_lambdas);
 		Model model = new Model(n, pc);
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < NUM_OF_DRAWS_FOR_WB_LAMBDAS; i++) {
 			System.out.print(".");
 			//draw random lambda values to test
 			lambdas = new ArrayList<Double>();
