@@ -34,6 +34,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		double res=0;
 		for (int i=0;i<lambdas.size();i++){
 			res+=lambdas.get(i)*calculateProbabilityBeforeInterpulation(ngram);
+			//System.out.println(ngram);
 			ngram=ngram.remove_first_word();
 		}	
 		//a dirty fix to prevent probability to be 0 (eg can happens when all words are unknowns)
@@ -43,7 +44,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 		private Double calculateProbabilityBeforeInterpulation(Ngram ngram) {
 			Integer count = 0;
 			int numerator;
-			int denominator;
+			long denominator;
 			if (ngram.n() == 1) {
 				if (counters.get(1).get(ngram) != null)  {
 					return ((double)(counters.get(1).get(ngram)) / (double)corpus_size);
@@ -61,7 +62,7 @@ public class WrittenBellProbabilityCalculator extends ProbabilityCalculator {
 				
 				if ((count = counters.get(ngram.n()).get(ngram)) == null) {
 					numerator = T;
-					denominator = Z * (N + T);
+					denominator = (long) Z * (N + T);
 				} else {
 					numerator = count;
 					denominator = N + T;

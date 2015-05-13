@@ -67,7 +67,7 @@ public class Model {
 			}
 			Double calculateProbability = pc
 					.calculateProbability(curr_ngram);
-		//	System.out.println(curr_ngram + " " + calculateProbability);
+//			System.out.println(curr_ngram + " " + calculateProbability);
 			sumOfLogs += Math.log(calculateProbability);
 
 		}
@@ -75,7 +75,7 @@ public class Model {
 		double logPerplexity = -(sumOfLogs / len + 2);
 
 		double perplexity = Math.pow(Math.E, logPerplexity);
-		if (Double.isInfinite(perplexity)) {
+		if (Double.isInfinite(perplexity) || Double.isNaN(perplexity)) {
 			System.out.println(sumOfLogs);
 			System.err.println("perplexity =  " + perplexity);
 			System.err.println();

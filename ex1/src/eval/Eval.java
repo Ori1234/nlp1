@@ -25,7 +25,7 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 public class Eval {
 
 	public static void main(String[] args) {
-		
+
 		Map<String, String> params = Utils.parseARGS(args);
 
 		String input = params.get("-i");
@@ -36,33 +36,39 @@ public class Eval {
 		if (model_file == null) {
 			throw new IllegalArgumentException("missing required flag -m");
 		}
-		
+
 		double averagePerplexity = evalTextByModel(input, model_file);
-		System.out.println("average proplexity on "+ input+" lines= "+averagePerplexity);
+		System.out.println("average proplexity on " + input + " lines= "
+				+ averagePerplexity);
 	}
 
-	
 	public static double evalTextByModel(String input, String model_file) {
 		// read model from model file
-		Model model = loadModel(model_file);
 		
-		List<Double> proplexities=new ArrayList<Double>();
+		System.out.println("loading model file "+ model_file + "...");
+		Model model = loadModel(model_file);
+
+		System.out.println("calculating perplexities "+ input);
+		List<Double> proplexities = new ArrayList<Double>();
 		// read input text and calculate perplexity for each line in text.
-		try (BufferedReader br = new BufferedReader(new FileReader(input))) {			
+		try (BufferedReader br = new BufferedReader(new FileReader(input))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-			proplexities.add(model.calculateProplexity(line));
+				
+				proplexities.add(model.calculateProplexity(line));
+				System.out.print(".");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//System.out.println(model_file);
-		
-		//Average all perplexity values for model evaluation.
-		OptionalDouble average_proplexity =proplexities.stream().mapToDouble(Double::doubleValue).average();
-		
+
+		// System.out.println(model_file);
+
+		// Average all perplexity values for model evaluation.
+		OptionalDouble average_proplexity = proplexities.stream()
+				.mapToDouble(Double::doubleValue).average();
+
 		System.out.println(average_proplexity);
 
 		return average_proplexity.getAsDouble();
@@ -72,10 +78,9 @@ public class Eval {
 		DATA, N_GRAM, UNKNOWN;
 	}
 
-	
 	private static Model loadModel(String model_file) {
 		Map<Integer, Map<Ngram, Integer>> counters = new HashMap<Integer, Map<Ngram, Integer>>();
-		Map<String, String> data = new HashMap<String, String>();		
+		Map<String, String> data = new HashMap<String, String>();
 		try (BufferedReader br = new BufferedReader(new FileReader(model_file))) {
 			String line;
 			int n = 0;
@@ -152,13 +157,16 @@ public class Eval {
 		// TODO check that data have required fields
 		ProbabilityCalculator pc;
 		if (data.get("smoothing").equals(SMOOTHING.LIDSTONE.toString())) {
-			pc = new LindstonProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary size")), Double.parseDouble(data.get("lidstone labmda")));
+			pc = new LindstonProbabilityCalculator(counters,
+					Integer.parseInt(data.get("vucabulary size")),
+					Double.parseDouble(data.get("lidstone labmda")));
 		} else {
 			List<Double> lambdas = new ArrayList<Double>();
 			for (String l : data.get("wb labmdas").split(" ")) {
 				lambdas.add(Double.parseDouble(l));
 			}
-			pc = new WrittenBellProbabilityCalculator(counters, Integer.parseInt(data.get("vucabulary size")), lambdas);
+			pc = new WrittenBellProbabilityCalculator(counters,
+					Integer.parseInt(data.get("vucabulary size")), lambdas);
 		}
 
 		return new Model(max(counters.keySet()), pc);
