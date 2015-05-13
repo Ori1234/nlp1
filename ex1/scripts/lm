@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export _JAVA_OPTIONS=-Xmx1024m
+java -cp ex1.jar lm.Lm $@
+
