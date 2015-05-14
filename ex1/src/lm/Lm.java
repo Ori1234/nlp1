@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+
 import utils.Model;
 import utils.Ngram;
 import utils.SMOOTHING;
@@ -20,8 +21,8 @@ import utils.ProbabilityCalculators.WrittenBellProbabilityCalculator;
 
 public class Lm {
 
-	private static final double HELDOUT_PERCENTEGE = 0.003;
-	private static final int NUM_OF_DRAWS_FOR_WB_LAMBDAS = 200;
+	private static final double HELDOUT_PERCENTEGE = 0.01;
+	private static final int NUM_OF_DRAWS_FOR_WB_LAMBDAS = 1000;
 	static Random random = new Random();
 
 	/*
@@ -67,7 +68,12 @@ public class Lm {
 		System.out.println("Counting n-grams in corpus...");
 		for (int curr_n = n; curr_n > 0; curr_n--) {
 			System.out.println("N = "+curr_n);
-			Map<Ngram, Integer> counters = countNgrams(curr_n, input, heldout);
+			Map<Ngram, Integer> counters;
+			if (curr_n == n){
+				counters = countNgrams(curr_n, input, heldout);
+			}else {
+				counters = countNgrams(curr_n, input, null);
+			}
 			counts.put(curr_n, counters);
 		}
 		// write model

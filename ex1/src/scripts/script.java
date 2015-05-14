@@ -10,7 +10,7 @@ public class script {
 
 		String[] langs = { "en", "es", "ca" };
 
-		if (false) {
+		if (true) {
 			Map<String, Map<Integer, Map<Double, Double>>> results2 = new HashMap<String, Map<Integer, Map<Double, Double>>>();
 			for (String lang : langs) {
 				Map<Integer, Map<Double, Double>> map = new HashMap<Integer, Map<Double, Double>>();
@@ -71,8 +71,9 @@ public class script {
 				System.out.println();
 
 			}
-		} else {
-
+		} 
+		//else {
+		if (true){
 			Map<String, Map<Integer, Double>> results = new HashMap<String, Map<Integer, Double>>();
 
 			for (String lang : langs) {
